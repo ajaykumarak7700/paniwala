@@ -208,6 +208,7 @@ function checkPin() {
   alert("गलत पिन! (Incorrect PIN)");
   return false;
 }
+window.checkPin = checkPin;
 
 function saveBooking() {
   try {
