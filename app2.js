@@ -50,19 +50,21 @@ function renderDashboard(){
   const todayE=todayB.reduce((s,b)=>s+b.paid,0);
   const pending=DB.bookings.reduce((s,b)=>s+b.remain,0);
   
-  // Include extra income
   const todayExtra = (DB.extraIncome||[]).filter(i=>i.date===t).reduce((s,i)=>s+i.amount,0);
   const monthExtra = (DB.extraIncome||[]).filter(i=>i.date?.startsWith(m)).reduce((s,i)=>s+i.amount,0);
+
+  const todayExp = (DB.extraExpense||[]).filter(e=>e.date===t).reduce((s,e)=>s+e.amount,0);
+  const monthExp = (DB.extraExpense||[]).filter(e=>e.date?.startsWith(m)).reduce((s,e)=>s+e.amount,0);
 
   const monthE=DB.bookings.filter(b=>b.bookingDate?.startsWith(m)).reduce((s,b)=>s+b.total,0);
   const itemsOut=DB.bookings.reduce((s,b)=>s+(b.jars-(b.jarsReturned||0))+(b.bottles-(b.bottlesReturned||0)),0);
   const pendingItems=DB.bookings.filter(b=>(b.jars-(b.jarsReturned||0))>0 || (b.bottles-(b.bottlesReturned||0))>0).length;
 
   document.getElementById('statTodayBookings').textContent=todayB.length;
-  document.getElementById('statTodayEarning').textContent='₹'+(todayE + todayExtra);
+  document.getElementById('statTodayEarning').textContent='₹'+(todayE + todayExtra - todayExp);
   document.getElementById('statPending').textContent='₹'+pending;
   document.getElementById('statJarsOut').textContent=itemsOut;
-  document.getElementById('statMonthEarning').textContent='₹'+(monthE + monthExtra);
+  document.getElementById('statMonthEarning').textContent='₹'+(monthE + monthExtra - monthExp);
   document.getElementById('statPendingJars').textContent=pendingItems;
 
   const reminders=[];
@@ -75,15 +77,51 @@ function renderDashboard(){
   });
   const rbox=document.getElementById('reminderBox');
   const rlist=document.getElementById('reminderList');
-  if(reminders.length){
-    rbox.style.display='block';
-    rlist.innerHTML=[...new Set(reminders)].slice(0,6).map(r=>`<div class="reminder-item">${r}</div>`).join('');
-  }else rbox.style.display='none';
+  if(rbox && rlist) {
+    if(reminders.length){
+      rbox.style.display='block';
+      rlist.innerHTML=[...new Set(reminders)].slice(0,6).map(r=>`<div class="reminder-item">${r}</div>`).join('');
+    }else rbox.style.display='none';
+  }
 
   document.getElementById('upcomingList').innerHTML=upcoming.length?upcoming.map(bookingCardHTML).join(''):emptyHTML('📅','कोई आगामी बुकिंग नहीं');
   document.getElementById('todayList').innerHTML=todayB.length?todayB.map(bookingCardHTML).join(''):emptyHTML('🗓️','आज कोई बुकिंग नहीं');
-  
   if(typeof renderCalendar === 'function') renderCalendar();
+}
+
+// ===== EXTRA INCOME / EXPENSE =====
+function openIncomeModal(){
+  document.getElementById('incomeAmount').value='';
+  document.getElementById('incomeNote').value='';
+  document.getElementById('incomeDate').value=today();
+  document.getElementById('incomeModal').style.display='flex';
+}
+function closeIncomeModal(e){if(e.target.id==='incomeModal')document.getElementById('incomeModal').style.display='none';}
+function saveExtraIncome(){
+  const amt=parseFloat(document.getElementById('incomeAmount').value)||0;
+  const note=document.getElementById('incomeNote').value.trim()||'अन्य आय';
+  const date=document.getElementById('incomeDate').value||today();
+  if(amt<=0){showToast('कृपया सही राशि दर्ज करें');return;}
+  if(!DB.extraIncome)DB.extraIncome=[];
+  DB.extraIncome.push({id:uid(),date,amount:amt,note});
+  save();document.getElementById('incomeModal').style.display='none';showToast('आय सेव हो गई ✅');renderDashboard();
+}
+
+function openExpenseModal(){
+  document.getElementById('expenseAmount').value='';
+  document.getElementById('expenseNote').value='';
+  document.getElementById('expenseDate').value=today();
+  document.getElementById('expenseModal').style.display='flex';
+}
+function closeExpenseModal(e){if(e.target.id==='expenseModal')document.getElementById('expenseModal').style.display='none';}
+function saveExtraExpense(){
+  const amt=parseFloat(document.getElementById('expenseAmount').value)||0;
+  const note=document.getElementById('expenseNote').value.trim()||'अन्य खर्च';
+  const date=document.getElementById('expenseDate').value||today();
+  if(amt<=0){showToast('कृपया सही राशि दर्ज करें');return;}
+  if(!DB.extraExpense)DB.extraExpense=[];
+  DB.extraExpense.push({id:uid(),date,amount:amt,note});
+  save();document.getElementById('expenseModal').style.display='none';showToast('खर्च सेव हो गया 📉');renderDashboard();
 }
 
 // ===== CALENDAR =====

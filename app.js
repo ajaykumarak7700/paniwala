@@ -44,6 +44,7 @@ function load() {
   if (d) { try { DB = JSON.parse(d); } catch(e){} }
   if(!DB.bookings) DB.bookings=[];
   if(!DB.extraIncome) DB.extraIncome=[];
+  if(!DB.extraExpense) DB.extraExpense=[];
   if(!DB.settings) DB.settings = {};
   if(!DB.settings.appUser) DB.settings.appUser = '7700828989';
   if(!DB.settings.appPass) DB.settings.appPass = 'Ajay@1522#';
