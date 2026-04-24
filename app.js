@@ -1,7 +1,7 @@
 // ===== DATA LAYER =====
 let DB = {
   bookings: [],
-  settings: { bizName:'जल सप्लाई प्लांट', bizMobile:'', bizAddress:'', totalJars:50, slipCounter:1 }
+  settings: { bizName:'आशा एंटरप्राइजेस', bizTagline:'शुद्ध जल', bizMobile:'', bizAddress:'', totalJars:50, slipCounter:1 }
 };
 
 function save() { 
