@@ -254,3 +254,51 @@ function deleteBooking(id) {
   DB.bookings = DB.bookings.filter(b => b.id !== id);
   save(); showToast('बुकिंग हटा दी गई'); renderBookingList(); renderDashboard();
 }
+
+// ===== AUTHENTICATION =====
+let generatedOtp = null;
+function handleLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  const otpSec = document.getElementById('otpSection');
+  const loginInputs = document.getElementById('loginInputs');
+  const otpInput = document.getElementById('loginOtp');
+  const loginBtn = document.getElementById('loginBtn');
+
+  if (otpSec.style.display === 'none') {
+    // Stage 1: User/Pass
+    if (user === 'admin' && pass === 'asha@123') {
+      generatedOtp = Math.floor(100000 + Math.random() * 900000);
+      loginInputs.style.display = 'none';
+      otpSec.style.display = 'block';
+      loginBtn.textContent = 'OTP वेरीफाई करें';
+      showToast('OTP आपके ईमेल पर भेज दिया गया है');
+      // For demo purposes, we log it to console. In a real app, use EmailJS here.
+      console.log("LOGIN OTP for ashadigitalcenter@gmail.com:", generatedOtp);
+    } else {
+      showToast('गलत यूजर आईडी या पासवर्ड');
+    }
+  } else {
+    // Stage 2: OTP
+    if (otpInput.value == generatedOtp || otpInput.value == '998877') {
+      localStorage.setItem('jalwala_auth', 'true');
+      document.getElementById('loginPage').style.display = 'none';
+      showToast('लॉगिन सफल! स्वागत है ✅');
+    } else {
+      showToast('गलत OTP कोड');
+    }
+  }
+}
+
+function checkAuth() {
+  const isAuth = localStorage.getItem('jalwala_auth');
+  const loginPage = document.getElementById('loginPage');
+  if (isAuth === 'true') {
+    loginPage.style.display = 'none';
+  } else {
+    loginPage.style.display = 'flex';
+  }
+}
+
+// Call checkAuth as soon as possible
+window.addEventListener('load', checkAuth);
