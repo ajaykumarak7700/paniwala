@@ -332,16 +332,6 @@ function saveSell(){
   
   if(sJ <= 0 && sB <= 0){showToast('कम से कम एक जार या बोतल दर्ज करें');return;}
   
-  // Check Stock
-  const jOut = DB.bookings.reduce((s,b)=>s+Math.max(0, b.jars-(b.jarsReturned||0)), 0);
-  const bOut = DB.bookings.reduce((s,b)=>s+Math.max(0, b.bottles-(b.bottlesReturned||0)), 0);
-  
-  const jAvail = Math.max(0, (DB.settings.totalJars || 0) - jOut);
-  const bAvail = Math.max(0, (DB.settings.totalBottles || 0) - bOut);
-  
-  if (sJ > jAvail) { showToast(`पर्याप्त जार नहीं! (सिर्फ ${jAvail} जार उपलब्ध हैं)`); return; }
-  if (sB > bAvail) { showToast(`पर्याप्त बोतल नहीं! (सिर्फ ${bAvail} बोतल उपलब्ध हैं)`); return; }
-  
   // Decrease stock globally
   if(sJ > 0) DB.settings.totalJars = Math.max(0, DB.settings.totalJars - sJ);
   if(sB > 0) DB.settings.totalBottles = Math.max(0, DB.settings.totalBottles - sB);
@@ -355,7 +345,6 @@ function saveSell(){
   save();
   document.getElementById('sellModal').style.display='none';
   showToast('बिक्री सेव हो गई ✅');
-  renderJars();
   renderDashboard();
 }
 
@@ -365,11 +354,14 @@ function openSettings(){
   document.getElementById('bizTagline').value=DB.settings.bizTagline||'';
   document.getElementById('bizMobile').value=DB.settings.bizMobile||'';
   document.getElementById('bizAddress').value=DB.settings.bizAddress||'';
-  document.getElementById('gitToken').value=DB.settings.gitToken||'';
-  document.getElementById('gitRepo').value=DB.settings.gitRepo||'';
-  document.getElementById('gitFile').value=DB.settings.gitFile||'data.json';
   document.getElementById('setAppUser').value=DB.settings.appUser||'7700828989';
   document.getElementById('setAppPass').value=DB.settings.appPass||'Ajay@1522#';
+  
+  // Firebase
+  document.getElementById('fbApiKey').value=DB.settings.fbApiKey||'';
+  document.getElementById('fbDbUrl').value=DB.settings.fbDbUrl||'';
+  document.getElementById('fbProjectId').value=DB.settings.fbProjectId||'';
+  
   document.getElementById('settingsModal').style.display='flex';
 }
 function closeSettings(e){if(e.target.id==='settingsModal')document.getElementById('settingsModal').style.display='none';}
@@ -378,79 +370,24 @@ function saveSettings(){
   DB.settings.bizTagline=document.getElementById('bizTagline').value.trim()||'शुद्ध जल';
   DB.settings.bizMobile=document.getElementById('bizMobile').value.trim();
   DB.settings.bizAddress=document.getElementById('bizAddress').value.trim();
-  DB.settings.gitToken=document.getElementById('gitToken').value.trim();
-  DB.settings.gitRepo=document.getElementById('gitRepo').value.trim();
-  DB.settings.gitFile=document.getElementById('gitFile').value.trim()||'data.json';
   
   const newUser = document.getElementById('setAppUser').value.trim();
   const newPass = document.getElementById('setAppPass').value.trim();
   if(newUser) DB.settings.appUser = newUser;
   if(newPass) DB.settings.appPass = newPass;
 
-  save();document.getElementById('settingsModal').style.display='none';showToast('सेटिंग सेव हो गई ✅');
+  // Firebase
+  DB.settings.fbApiKey = document.getElementById('fbApiKey').value.trim();
+  DB.settings.fbDbUrl = document.getElementById('fbDbUrl').value.trim();
+  DB.settings.fbProjectId = document.getElementById('fbProjectId').value.trim();
+
+  save();
+  if(typeof initFirebase === 'function') initFirebase();
+  document.getElementById('settingsModal').style.display='none';
+  showToast('सेटिंग सेव हो गई और Firebase कनेक्ट हो रहा है ✅');
 }
 
-// ===== GITHUB CLOUD SERVER =====
-let gitSha = '';
-async function syncWithGitHub() {
-  const btn = document.getElementById('syncBtn');
-  const icon = document.getElementById('syncIcon');
-  if(!DB.settings.gitToken || !DB.settings.gitRepo) { showToast('Token और Repo नाम दर्ज करें'); return; }
-  
-  btn.disabled = true; icon.textContent = '⏳';
-  const url = `https://api.github.com/repos/${DB.settings.gitRepo}/contents/${DB.settings.gitFile||'data.json'}`;
-  
-  try {
-    const res = await fetch(url, { headers: { 'Authorization': `token ${DB.settings.gitToken}` } });
-    if(res.status === 200) {
-      const json = await res.json();
-      gitSha = json.sha;
-      const content = decodeURIComponent(escape(atob(json.content)));
-      DB = JSON.parse(content);
-      save(); renderDashboard();
-      showToast('सर्वर से डेटा सिंक हो गया ✅');
-    } else if(res.status === 404) {
-      await pushToGitHub();
-      showToast('सर्वर पर नया डेटा बन गया ✅');
-    } else if(res.status === 401) {
-      showToast('सिंक फेल: आपका टोकन एक्सपायर या गलत है (401)');
-    } else if(res.status === 403) {
-      showToast('सिंक फेल: एक्सेस डिनाइड (403) - टोकन चेक करें');
-    } else {
-      showToast('सिंक फेल: एरर कोड ' + res.status);
-    }
-  } catch(e) {
-    showToast('नेटवर्क त्रुटि: इंटरनेट चेक करें');
-  }
-  btn.disabled = false; icon.textContent = '🔄';
-}
-
-async function pushToGitHub() {
-  if(!DB.settings.gitToken || !DB.settings.gitRepo) return;
-  const url = `https://api.github.com/repos/${DB.settings.gitRepo}/contents/${DB.settings.gitFile||'data.json'}`;
-  
-  if(!gitSha) {
-    try {
-      const res = await fetch(url, { headers: { 'Authorization': `token ${DB.settings.gitToken}` } });
-      if(res.status === 200) gitSha = (await res.json()).sha;
-    } catch(e){}
-  }
-
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(DB, null, 2))));
-  const body = { message: 'Auto backup from Jalwala App', content: content };
-  if(gitSha) body.sha = gitSha;
-
-  try {
-    const res = await fetch(url, {
-      method: 'PUT',
-      headers: { 'Authorization': `token ${DB.settings.gitToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if(res.status === 200 || res.status === 201) {
-      gitSha = (await res.json()).content.sha;
-    }
-  } catch(e) {}
-}
+// ===== FIREBASE SYNC (Handled in app.js real-time) =====
 
 // ===== WHATSAPP =====
 function shareWhatsApp(id){

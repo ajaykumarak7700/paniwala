@@ -8,28 +8,53 @@ let DB = {
   }
 };
 
-function save() { 
-  localStorage.setItem('jalwala_db', JSON.stringify(DB)); 
-  if(DB.settings.gitToken && DB.settings.gitRepo) {
-    clearTimeout(window.syncTimer);
-    window.syncTimer = setTimeout(pushToGitHub, 2000); // Debounce
+let firebaseDB = null;
+let isRemoteUpdate = false;
+
+function initFirebase() {
+  if (DB.settings.fbApiKey && DB.settings.fbDbUrl) {
+    const config = { apiKey: DB.settings.fbApiKey, databaseURL: DB.settings.fbDbUrl, projectId: DB.settings.fbProjectId };
+    if (!firebase.apps.length) firebase.initializeApp(config);
+    firebaseDB = firebase.database();
+    
+    // Listen for real-time changes
+    firebaseDB.ref('jalwala_data').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        isRemoteUpdate = true;
+        DB = data;
+        localStorage.setItem('jalwala_db', JSON.stringify(DB));
+        if (typeof renderDashboard === 'function') renderDashboard();
+        if (typeof checkAuth === 'function') checkAuth();
+        setTimeout(() => { isRemoteUpdate = false; }, 1000);
+      }
+    });
   }
 }
+
+function save() { 
+  localStorage.setItem('jalwala_db', JSON.stringify(DB)); 
+  if (firebaseDB && !isRemoteUpdate) {
+    firebaseDB.ref('jalwala_data').set(DB);
+  }
+}
+
 function load() {
   const d = localStorage.getItem('jalwala_db');
   if (d) { try { DB = JSON.parse(d); } catch(e){} }
   if(!DB.bookings) DB.bookings=[];
   if(!DB.extraIncome) DB.extraIncome=[];
+  if(!DB.settings) DB.settings = {};
   if(!DB.settings.appUser) DB.settings.appUser = '7700828989';
   if(!DB.settings.appPass) DB.settings.appPass = 'Ajay@1522#';
   if(!DB.settings.sessionVer) DB.settings.sessionVer = 1;
-
-  // Auto-configure Cloud Sync (Encoded to bypass scanners)
-  const _k = 'Z2hwXzNZeWNhS2lPcTZjTmJwdTNsalhDN2p1UkNPdDRsMFZvVGpY';
-  if(!DB.settings) DB.settings = {};
-  if(!DB.settings.gitToken) DB.settings.gitToken = atob(_k);
-  if(!DB.settings.gitRepo) DB.settings.gitRepo = 'ajaykumarak7700/paniwala';
-  if(!DB.settings.gitFile) DB.settings.gitFile = 'data.json';
+  
+  // Pre-configure Firebase
+  if(!DB.settings.fbApiKey) DB.settings.fbApiKey = 'AIzaSyDm6Fyz0GukJmanTWJAjCzsHyTdZPptJ18';
+  if(!DB.settings.fbProjectId) DB.settings.fbProjectId = 'pani-app-4ff11';
+  if(!DB.settings.fbDbUrl) DB.settings.fbDbUrl = 'https://pani-app-4ff11-default-rtdb.firebaseio.com/';
+  
+  initFirebase();
 }
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }

@@ -7,6 +7,8 @@
 <meta name="description" content="जल सप्लाई बिज़नेस के लिए बुकिंग, डिलीवरी और भुगतान प्रबंधन"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
   (function() {
@@ -343,13 +345,11 @@
     </div>
 
     <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px">
-      <div class="modal-title" style="font-size:16px;color:#1565C0">☁️ गिटहब क्लाउड सर्वर</div>
-      <div class="form-group"><label>GitHub Token</label><input type="password" id="gitToken" placeholder="ghp_xxxxxxxxxxxx"/></div>
-      <div class="form-group"><label>Repository Name</label><input type="text" id="gitRepo" placeholder="username/jalwala-data"/></div>
-      <div class="form-group"><label>File Name</label><input type="text" id="gitFile" placeholder="data.json"/></div>
-      <button class="btn-primary" onclick="syncWithGitHub()" style="background:#0D47A1;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px" id="syncBtn">
-        <span id="syncIcon">🔄</span> सर्वर से सिंक करें
-      </button>
+      <div class="modal-title" style="font-size:16px;color:#1565C0">🔥 Firebase क्लाउड सर्वर</div>
+      <p style="font-size:10px;color:#666;margin-bottom:10px">डेटा को सभी डिवाइस पर तुरंत सिंक करने के लिए Firebase Config डालें।</p>
+      <div class="form-group"><label>Firebase API Key</label><input type="password" id="fbApiKey" placeholder="AIza..."/></div>
+      <div class="form-group"><label>Firebase DB URL</label><input type="text" id="fbDbUrl" placeholder="https://your-app.firebaseio.com"/></div>
+      <div class="form-group"><label>Project ID</label><input type="text" id="fbProjectId" placeholder="your-project-id"/></div>
     </div>
     <div class="btn-group">
       <button class="btn-primary" onclick="saveSettings()">💾 सेव करें</button>
