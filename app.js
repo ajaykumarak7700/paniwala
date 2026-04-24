@@ -200,8 +200,19 @@ function clearForm() {
   document.getElementById('remainAmt').textContent = '₹0';
 }
 
+// ===== SECURITY PIN =====
+function checkPin() {
+  const pin = prompt("सुरक्षा पिन दर्ज करें (Security PIN):");
+  if (pin === "252325") return true;
+  if (pin === null) return false;
+  alert("गलत पिन! (Incorrect PIN)");
+  return false;
+}
+
 function saveBooking() {
   try {
+    if (!checkPin()) return; // PIN Check
+    
     const name = document.getElementById('custName').value.trim();
     const mobile = document.getElementById('custMobile').value.trim();
     const eventDate = document.getElementById('eventDate').value;
@@ -316,6 +327,7 @@ function editBooking(id) {
 }
 
 function deleteBooking(id) {
+  if (!checkPin()) return;
   if (!confirm('इस बुकिंग को रीसायकल बिन में डालें?')) return;
   const idx = DB.bookings.findIndex(b => b.id === id);
   if (idx > -1) {
@@ -330,6 +342,7 @@ function deleteBooking(id) {
 }
 
 function restoreBooking(id) {
+  if (!checkPin()) return;
   const idx = DB.trash.findIndex(b => b.id === id);
   if (idx > -1) {
     DB.bookings.unshift(DB.trash[idx]);
@@ -343,6 +356,7 @@ function restoreBooking(id) {
 }
 
 function permanentDelete(id) {
+  if (!checkPin()) return;
   if (!confirm('सावधान! यह हमेशा के लिए डिलीट हो जाएगा।?')) return;
   DB.trash = DB.trash.filter(b => b.id !== id);
   save();

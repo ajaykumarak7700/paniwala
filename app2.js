@@ -120,6 +120,7 @@ function openIncomeModal(){
 }
 function closeIncomeModal(e){if(e.target.id==='incomeModal')document.getElementById('incomeModal').style.display='none';}
 function saveExtraIncome(){
+  if (!checkPin()) return;
   try {
     const amt=parseFloat(document.getElementById('incomeAmount')?.value) || 0;
     const note=document.getElementById('incomeNote')?.value?.trim() || 'अन्य आय';
@@ -145,6 +146,7 @@ function openExpenseModal(){
 }
 function closeExpenseModal(e){if(e.target.id==='expenseModal')document.getElementById('expenseModal').style.display='none';}
 function saveExtraExpense(){
+  if (!checkPin()) return;
   try {
     const amt=parseFloat(document.getElementById('expenseAmount')?.value) || 0;
     const note=document.getElementById('expenseNote')?.value?.trim() || 'अन्य खर्च';
