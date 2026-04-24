@@ -98,13 +98,21 @@ function openIncomeModal(){
 }
 function closeIncomeModal(e){if(e.target.id==='incomeModal')document.getElementById('incomeModal').style.display='none';}
 function saveExtraIncome(){
-  const amt=parseFloat(document.getElementById('incomeAmount').value)||0;
-  const note=document.getElementById('incomeNote').value.trim()||'अन्य आय';
-  const date=document.getElementById('incomeDate').value||today();
-  if(amt<=0){showToast('कृपया सही राशि दर्ज करें');return;}
-  if(!DB.extraIncome)DB.extraIncome=[];
-  DB.extraIncome.push({id:uid(),date,amount:amt,note});
-  save();document.getElementById('incomeModal').style.display='none';showToast('आय सेव हो गई ✅');renderDashboard();
+  try {
+    const amt=parseFloat(document.getElementById('incomeAmount')?.value) || 0;
+    const note=document.getElementById('incomeNote')?.value?.trim() || 'अन्य आय';
+    const date=document.getElementById('incomeDate')?.value || today();
+    if(amt<=0){showToast('कृपया सही राशि दर्ज करें');return;}
+    if(!DB.extraIncome) DB.extraIncome=[];
+    DB.extraIncome.push({id:uid(), date, amount:amt, note});
+    save();
+    document.getElementById('incomeModal').style.display='none';
+    showToast('आय सेव हो गई ✅');
+    renderDashboard();
+  } catch (err) {
+    console.error(err);
+    showToast('आय सेव करने में त्रुटि: ' + err.message);
+  }
 }
 
 function openExpenseModal(){
@@ -115,13 +123,21 @@ function openExpenseModal(){
 }
 function closeExpenseModal(e){if(e.target.id==='expenseModal')document.getElementById('expenseModal').style.display='none';}
 function saveExtraExpense(){
-  const amt=parseFloat(document.getElementById('expenseAmount').value)||0;
-  const note=document.getElementById('expenseNote').value.trim()||'अन्य खर्च';
-  const date=document.getElementById('expenseDate').value||today();
-  if(amt<=0){showToast('कृपया सही राशि दर्ज करें');return;}
-  if(!DB.extraExpense)DB.extraExpense=[];
-  DB.extraExpense.push({id:uid(),date,amount:amt,note});
-  save();document.getElementById('expenseModal').style.display='none';showToast('खर्च सेव हो गया 📉');renderDashboard();
+  try {
+    const amt=parseFloat(document.getElementById('expenseAmount')?.value) || 0;
+    const note=document.getElementById('expenseNote')?.value?.trim() || 'अन्य खर्च';
+    const date=document.getElementById('expenseDate')?.value || today();
+    if(amt<=0){showToast('कृपया सही राशि दर्ज करें');return;}
+    if(!DB.extraExpense) DB.extraExpense=[];
+    DB.extraExpense.push({id:uid(), date, amount:amt, note});
+    save();
+    document.getElementById('expenseModal').style.display='none';
+    showToast('खर्च सेव हो गया 📉');
+    renderDashboard();
+  } catch (err) {
+    console.error(err);
+    showToast('खर्च सेव करने में त्रुटि: ' + err.message);
+  }
 }
 
 // ===== CALENDAR =====

@@ -49,8 +49,9 @@ function load() {
   if(!DB.settings.appUser) DB.settings.appUser = '7700828989';
   if(!DB.settings.appPass) DB.settings.appPass = 'Ajay@1522#';
   if(!DB.settings.sessionVer) DB.settings.sessionVer = 1;
+  if(!DB.settings.slipCounter) DB.settings.slipCounter = 1;
   
-  // Pre-configure Firebase
+  // Pre-configure Firebase if missing
   if(!DB.settings.fbApiKey) DB.settings.fbApiKey = 'AIzaSyDm6Fyz0GukJmanTWJAjCzsHyTdZPptJ18';
   if(!DB.settings.fbProjectId) DB.settings.fbProjectId = 'pani-app-4ff11';
   if(!DB.settings.fbDbUrl) DB.settings.fbDbUrl = 'https://pani-app-4ff11-default-rtdb.firebaseio.com/';
