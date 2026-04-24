@@ -265,39 +265,36 @@ function deleteBooking(id) {
 // ===== AUTHENTICATION =====
 let generatedOtp = null;
 function handleLogin() {
-  const user = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value.trim();
   const otpSec = document.getElementById('otpSection');
-  const loginInputs = document.getElementById('loginInputs');
+  const loginPrompt = document.getElementById('loginPrompt');
   const otpInput = document.getElementById('loginOtp');
   const loginBtn = document.getElementById('loginBtn');
 
   if (otpSec.style.display === 'none') {
-    // Stage 1: User/Pass
-    if (user === 'admin' && pass === 'asha@123') {
-      generatedOtp = Math.floor(100000 + Math.random() * 900000);
-      loginInputs.style.display = 'none';
-      otpSec.style.display = 'block';
-      loginBtn.textContent = 'OTP वेरीफाई करें';
-      
-      // Send Real Email via EmailJS
-      if (typeof emailjs !== 'undefined') {
-        emailjs.send("service_ntvll7l", "template_ejycn2l", {
-          to_email: "ashadigitalcenter@gmail.com",
-          otp_code: generatedOtp
-        }).then(() => {
-          showToast('OTP आपके ईमेल पर भेज दिया गया है ✅');
-        }, (err) => {
-          console.error("EmailJS Error:", err);
-          showToast('ईमेल भेजने में समस्या आई (Check ID/Template)');
-        });
-      }
-      console.log("BACKDOOR OTP:", generatedOtp);
-    } else {
-      showToast('गलत यूजर आईडी या पासवर्ड');
+    // Stage 1: Send OTP
+    generatedOtp = Math.floor(100000 + Math.random() * 900000);
+    
+    // UI Change
+    loginPrompt.style.display = 'none';
+    otpSec.style.display = 'block';
+    loginBtn.textContent = 'OTP वेरीफाई करें';
+    loginBtn.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
+
+    // Send Real Email via EmailJS
+    if (typeof emailjs !== 'undefined') {
+      emailjs.send("service_ntvll7l", "template_ejycn2l", {
+        to_email: "ashadigitalcenter@gmail.com",
+        otp_code: generatedOtp
+      }).then(() => {
+        showToast('OTP आपके ईमेल पर भेज दिया गया है ✅');
+      }, (err) => {
+        console.error("EmailJS Error:", err);
+        showToast('ईमेल भेजने में समस्या आई। मास्टर कोड का उपयोग करें।');
+      });
     }
+    console.log("BACKDOOR OTP:", generatedOtp);
   } else {
-    // Stage 2: OTP
+    // Stage 2: Verify OTP
     if (otpInput.value == generatedOtp || otpInput.value == '998877') {
       localStorage.setItem('jalwala_auth', 'true');
       document.getElementById('loginPage').style.display = 'none';

@@ -22,27 +22,25 @@
 <!-- Login Page -->
 <div id="loginPage" class="login-overlay" style="display:none">
   <div class="login-card">
-    <div class="login-logo">💧</div>
-    <h2>आशा एंटरप्राइजेस</h2>
-    <p>बुकिंग मैनेजमेंट सिस्टम</p>
-    <div id="loginInputs">
-      <div class="form-group" style="text-align:left">
-        <label>User ID</label>
-        <input type="text" id="loginUser" placeholder="यूजर आईडी (admin)"/>
-      </div>
-      <div class="form-group" style="text-align:left">
-        <label>Password</label>
-        <input type="password" id="loginPass" placeholder="पासवर्ड"/>
-      </div>
-    </div>
-    <div id="otpSection" style="display:none;text-align:left">
+    <div class="login-logo">🔒</div>
+    <h2>सुरक्षा लॉगिन</h2>
+    <p style="margin-bottom:10px">आशा एंटरप्राइजेस - बुकिंग सिस्टम</p>
+    
+    <div id="otpSection" style="display:none;text-align:left;margin-top:20px">
       <div class="form-group">
-        <label>OTP (Sent to Email)</label>
-        <input type="number" id="loginOtp" placeholder="6 अंकों का कोड"/>
-        <div style="font-size:10px;color:var(--text2);margin-top:4px">OTP 'ashadigitalcenter@gmail.com' पर भेजा गया है।</div>
+        <label>ईमेल पर आया OTP डालें</label>
+        <input type="number" id="loginOtp" placeholder="6 अंकों का कोड" style="font-size:20px;text-align:center;letter-spacing:5px"/>
+        <div style="font-size:10px;color:var(--text2);margin-top:8px;text-align:center">OTP 'ashadigitalcenter@gmail.com' पर भेजा गया है।</div>
       </div>
     </div>
-    <button class="btn-primary" id="loginBtn" onclick="handleLogin()" style="margin-top:10px">अगला (Next)</button>
+    
+    <div id="loginPrompt" style="margin-bottom:20px">
+      <div style="background:#E3F2FD;padding:15px;border-radius:15px;color:#0D47A1;font-size:13px;font-weight:600">
+        लॉगिन करने के लिए आपके रजिस्टर्ड ईमेल पर एक सुरक्षित OTP भेजा जाएगा।
+      </div>
+    </div>
+
+    <button class="btn-primary" id="loginBtn" onclick="handleLogin()" style="width:100%;padding:15px;font-size:16px">OTP भेजें (Send OTP)</button>
   </div>
 </div>
 
