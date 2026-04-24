@@ -557,6 +557,11 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('eventDate').value=today();
   if (typeof checkDateAvailability === 'function') checkDateAvailability();
   renderDashboard();
+  
+  // Auto-sync from cloud on startup
+  if(DB.settings.gitToken && DB.settings.gitRepo) {
+    setTimeout(syncWithGitHub, 1000);
+  }
 });
 document.addEventListener('click',e=>{
   if(!e.target.closest('.form-group')){
