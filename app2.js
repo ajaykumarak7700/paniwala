@@ -412,11 +412,15 @@ async function syncWithGitHub() {
     } else if(res.status === 404) {
       await pushToGitHub();
       showToast('सर्वर पर नया डेटा बन गया ✅');
+    } else if(res.status === 401) {
+      showToast('सिंक फेल: आपका टोकन एक्सपायर या गलत है (401)');
+    } else if(res.status === 403) {
+      showToast('सिंक फेल: एक्सेस डिनाइड (403) - टोकन चेक करें');
     } else {
-      showToast('सिंक फेल: डिटेल्स जांचें');
+      showToast('सिंक फेल: एरर कोड ' + res.status);
     }
   } catch(e) {
-    showToast('नेटवर्क त्रुटि');
+    showToast('नेटवर्क त्रुटि: इंटरनेट चेक करें');
   }
   btn.disabled = false; icon.textContent = '🔄';
 }
