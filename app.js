@@ -41,6 +41,12 @@ function initFirebase() {
 }
 
 function save() { 
+  if (!DB || typeof DB !== 'object') DB = { bookings: [], extraIncome: [], extraExpense: [], settings: {} };
+  if (!DB.bookings) DB.bookings = [];
+  if (!DB.extraIncome) DB.extraIncome = [];
+  if (!DB.extraExpense) DB.extraExpense = [];
+  if (!DB.settings) DB.settings = {};
+
   localStorage.setItem('jalwala_db', JSON.stringify(DB)); 
   if (firebaseDB && !isRemoteUpdate) {
     firebaseDB.ref('jalwala_data').set(DB);
@@ -240,6 +246,10 @@ function saveBooking() {
       payments: adv > 0 ? [{ date: today(), amount: adv }] : []
     };
 
+    // Bulletproof check right before unshift
+    if (!DB || typeof DB !== 'object') DB = { bookings: [], extraIncome: [], extraExpense: [], settings: {} };
+    if (!Array.isArray(DB.bookings)) DB.bookings = [];
+    
     DB.bookings.unshift(booking);
     save();
     clearForm();
