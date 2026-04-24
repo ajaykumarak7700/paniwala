@@ -189,27 +189,27 @@ function saveBooking() {
     if (!mobile || mobile.length < 10) { showToast('सही मोबाइल नंबर दर्ज करें'); return; }
     if (!eventDate) { showToast('कार्यक्रम तिथि दर्ज करें'); return; }
 
-    const jars = parseFloat(document.getElementById('jarCount').value) || 0;
-    const bottles = parseFloat(document.getElementById('bottleCount').value) || 0;
-    const adv  = parseFloat(document.getElementById('advance').value) || 0;
+    const jars = parseFloat(document.getElementById('jarCount')?.value) || 0;
+    const bottles = parseFloat(document.getElementById('bottleCount')?.value) || 0;
+    const adv  = parseFloat(document.getElementById('advance')?.value) || 0;
     const tInput = document.getElementById('totalAmountInput');
     const total = parseFloat(tInput?.value) || 0;
-    const editId = document.getElementById('editId').value;
+    const editId = document.getElementById('editId')?.value || '';
 
     if (editId) {
       const idx = DB.bookings.findIndex(b => b.id === editId);
       if (idx > -1) {
         DB.bookings[idx] = { ...DB.bookings[idx],
           name, mobile,
-          address: document.getElementById('custAddress').value.trim(),
-          eventType: document.getElementById('eventType').value,
+          address: document.getElementById('custAddress')?.value?.trim() || '',
+          eventType: document.getElementById('eventType')?.value || 'शादी',
           eventDate,
-          water: parseFloat(document.getElementById('waterLiter').value) || 0,
+          water: parseFloat(document.getElementById('waterLiter')?.value) || 0,
           jars, bottles, total,
           advance: adv,
           paid: adv,
           remain: Math.max(0, total - adv),
-          notes: document.getElementById('bookingNotes').value.trim()
+          notes: document.getElementById('bookingNotes')?.value?.trim() || ''
         };
         save(); clearForm(); showToast('बुकिंग अपडेट हो गई ✅'); renderBookingList(); return;
       }
@@ -219,14 +219,14 @@ function saveBooking() {
       id: uid(), slipNo: slipNo(),
       bookingDate: today(),
       name, mobile,
-      address: document.getElementById('custAddress').value.trim(),
-      eventType: document.getElementById('eventType').value,
+      address: document.getElementById('custAddress')?.value?.trim() || '',
+      eventType: document.getElementById('eventType')?.value || 'शादी',
       eventDate,
-      water: parseFloat(document.getElementById('waterLiter').value) || 0,
+      water: parseFloat(document.getElementById('waterLiter')?.value) || 0,
       jars, bottles, total,
       advance: adv, paid: adv,
       remain: Math.max(0, total - adv),
-      notes: document.getElementById('bookingNotes').value.trim(),
+      notes: document.getElementById('bookingNotes')?.value?.trim() || '',
       jarsReturned: 0,
       payments: adv > 0 ? [{ date: today(), amount: adv }] : []
     };
