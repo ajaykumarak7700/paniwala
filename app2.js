@@ -183,10 +183,11 @@ function openCalDate(dStr) {
     renderBookingList();
     window.scrollTo(0,0);
   } else {
+    if(typeof clearForm === 'function') clearForm(); // Clear any old data first
     showPage('booking');
     switchTab('form', 'booking');
-    document.getElementById('eventDate').value = dStr;
-    if(typeof checkDateAvailability === 'function') checkDateAvailability();
+    document.getElementById('eventDate').value = dStr; // Set the clicked date
+    if(typeof checkDateAvailability === 'function') checkDateAvailability(); // Check if other bookings exist on this day
     window.scrollTo(0,0);
   }
 }
