@@ -355,6 +355,10 @@
       <button class="btn-primary" onclick="saveSettings()">💾 सेव करें</button>
       <button class="btn-secondary" onclick="document.getElementById('settingsModal').style.display='none'">बंद करें</button>
     </div>
+    <div style="margin-top:16px;border-top:2px solid #eee;padding-top:12px;background:#FFF5F5;padding:10px;border-radius:12px">
+      <div style="color:#C62828;font-weight:800;font-size:13px;margin-bottom:8px">⚠️ डेंजर जोन (Danger Zone)</div>
+      <button class="btn-danger" onclick="resetData()" style="background:#000;width:100%;font-size:12px">सारा डेटा साफ़ करें (Reset All Data)</button>
+    </div>
     <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px">
       <button class="btn-primary" onclick="exportExcel()" style="margin-bottom:8px;background:#107c41">📊 Excel (CSV) डाउनलोड करें</button>
       <button class="btn-danger" onclick="exportData()">📤 डेटा बैकअप (JSON)</button>

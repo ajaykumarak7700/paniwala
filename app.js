@@ -338,5 +338,15 @@ function logoutAll() {
   setTimeout(() => { location.reload(); }, 1500);
 }
 
+function resetData() {
+  if(!confirm('सावधान! क्या आप सारा डेटा (बुकिंग्स और इनकम) हमेशा के लिए डिलीट करना चाहते हैं?')) return;
+  DB.bookings = [];
+  DB.extraIncome = [];
+  DB.settings.slipCounter = 1;
+  save();
+  showToast('सारा डेटा डिलीट कर दिया गया है ✅');
+  setTimeout(() => location.reload(), 1500);
+}
+
 // Call checkAuth as soon as possible
 window.addEventListener('load', checkAuth);
