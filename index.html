@@ -22,25 +22,20 @@
 <!-- Login Page -->
 <div id="loginPage" class="login-overlay" style="display:none">
   <div class="login-card">
-    <div class="login-logo">🔒</div>
-    <h2>सुरक्षा लॉगिन</h2>
-    <p style="margin-bottom:10px">आशा एंटरप्राइजेस - बुकिंग सिस्टम</p>
+    <div class="login-logo">🔐</div>
+    <h2>लॉगिन करें</h2>
+    <p>आशा एंटरप्राइजेस - सुरक्षित लॉगिन</p>
     
-    <div id="otpSection" style="display:none;text-align:left;margin-top:20px">
-      <div class="form-group">
-        <label>ईमेल पर आया OTP डालें</label>
-        <input type="number" id="loginOtp" placeholder="6 अंकों का कोड" style="font-size:20px;text-align:center;letter-spacing:5px"/>
-        <div style="font-size:10px;color:var(--text2);margin-top:8px;text-align:center">OTP 'ashadigitalcenter@gmail.com' पर भेजा गया है।</div>
-      </div>
+    <div class="form-group" style="text-align:left">
+      <label>यूजर आईडी (User ID)</label>
+      <input type="text" id="loginUser" placeholder="अपना आईडी डालें"/>
     </div>
-    
-    <div id="loginPrompt" style="margin-bottom:20px">
-      <div style="background:#E3F2FD;padding:15px;border-radius:15px;color:#0D47A1;font-size:13px;font-weight:600">
-        लॉगिन करने के लिए आपके रजिस्टर्ड ईमेल पर एक सुरक्षित OTP भेजा जाएगा।
-      </div>
+    <div class="form-group" style="text-align:left">
+      <label>पासवर्ड (Password)</label>
+      <input type="password" id="loginPass" placeholder="अपना पासवर्ड डालें"/>
     </div>
 
-    <button class="btn-primary" id="loginBtn" onclick="handleLogin()" style="width:100%;padding:15px;font-size:16px">OTP भेजें (Send OTP)</button>
+    <button class="btn-primary" id="loginBtn" onclick="handleLogin()" style="width:100%;padding:15px;font-size:16px;margin-top:10px">लॉगिन (Login)</button>
   </div>
 </div>
 
@@ -340,6 +335,13 @@
     <div class="form-group"><label>मोबाइल नंबर</label><input type="tel" id="bizMobile" placeholder="मोबाइल नंबर"/></div>
     <div class="form-group"><label>पता</label><textarea id="bizAddress" rows="2" placeholder="व्यवसाय का पता"></textarea></div>
     
+    <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px">
+      <div class="modal-title" style="font-size:16px;color:#1565C0">🔒 सुरक्षा सेटिंग</div>
+      <div class="form-group"><label>यूजर आईडी</label><input type="text" id="setAppUser" placeholder="admin"/></div>
+      <div class="form-group"><label>नया पासवर्ड</label><input type="password" id="setAppPass" placeholder="पासवर्ड बदलें"/></div>
+      <button class="btn-danger" onclick="logoutAll()" style="margin-bottom:12px;background:#C62828;width:100%">🚪 सभी डिवाइस से लॉगआउट करें</button>
+    </div>
+
     <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px">
       <div class="modal-title" style="font-size:16px;color:#1565C0">☁️ गिटहब क्लाउड सर्वर</div>
       <div class="form-group"><label>GitHub Token</label><input type="password" id="gitToken" placeholder="ghp_xxxxxxxxxxxx"/></div>

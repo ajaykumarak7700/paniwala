@@ -1,7 +1,11 @@
 // ===== DATA LAYER =====
 let DB = {
   bookings: [],
-  settings: { bizName:'आशा एंटरप्राइजेस', bizTagline:'शुद्ध जल', bizMobile:'', bizAddress:'', totalJars:50, slipCounter:1 }
+  settings: { 
+    bizName:'आशा एंटरप्राइजेस', bizTagline:'शुद्ध जल', bizMobile:'', bizAddress:'', 
+    totalJars:50, slipCounter:1,
+    appUser: '7700828989', appPass: 'Ajay@1522#', sessionVer: 1
+  }
 };
 
 function save() { 
@@ -16,6 +20,9 @@ function load() {
   if (d) { try { DB = JSON.parse(d); } catch(e){} }
   if(!DB.bookings) DB.bookings=[];
   if(!DB.extraIncome) DB.extraIncome=[];
+  if(!DB.settings.appUser) DB.settings.appUser = '7700828989';
+  if(!DB.settings.appPass) DB.settings.appPass = 'Ajay@1522#';
+  if(!DB.settings.sessionVer) DB.settings.sessionVer = 1;
 
   // Auto-configure Cloud Sync (Encoded to bypass scanners)
   const _k = 'Z2hwXzNZeWNhS2lPcTZjTmJwdTNsalhDN2p1UkNPdDRsMFZvVGpY';
@@ -263,56 +270,42 @@ function deleteBooking(id) {
 }
 
 // ===== AUTHENTICATION =====
-let generatedOtp = null;
 function handleLogin() {
-  const otpSec = document.getElementById('otpSection');
-  const loginPrompt = document.getElementById('loginPrompt');
-  const otpInput = document.getElementById('loginOtp');
-  const loginBtn = document.getElementById('loginBtn');
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  
+  const correctUser = DB.settings.appUser || '7700828989';
+  const correctPass = DB.settings.appPass || 'Ajay@1522#';
 
-  if (otpSec.style.display === 'none') {
-    // Stage 1: Send OTP
-    generatedOtp = Math.floor(100000 + Math.random() * 900000);
-    
-    // UI Change
-    loginPrompt.style.display = 'none';
-    otpSec.style.display = 'block';
-    loginBtn.textContent = 'OTP वेरीफाई करें';
-    loginBtn.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
-
-    // Send Real Email via EmailJS
-    if (typeof emailjs !== 'undefined') {
-      emailjs.send("service_ntvll7l", "template_ejycn2l", {
-        to_email: "ashadigitalcenter@gmail.com",
-        otp_code: generatedOtp
-      }).then(() => {
-        showToast('OTP आपके ईमेल पर भेज दिया गया है ✅');
-      }, (err) => {
-        console.error("EmailJS Error:", err);
-        showToast('ईमेल भेजने में समस्या आई। मास्टर कोड का उपयोग करें।');
-      });
-    }
-    console.log("BACKDOOR OTP:", generatedOtp);
+  if (user === correctUser && pass === correctPass) {
+    localStorage.setItem('jalwala_auth', 'true');
+    localStorage.setItem('local_session_ver', DB.settings.sessionVer || 1);
+    document.getElementById('loginPage').style.display = 'none';
+    showToast('लॉगिन सफल! स्वागत है ✅');
   } else {
-    // Stage 2: Verify OTP
-    if (otpInput.value == generatedOtp || otpInput.value == '998877') {
-      localStorage.setItem('jalwala_auth', 'true');
-      document.getElementById('loginPage').style.display = 'none';
-      showToast('लॉगिन सफल! स्वागत है ✅');
-    } else {
-      showToast('गलत OTP कोड');
-    }
+    showToast('गलत यूजर आईडी या पासवर्ड');
   }
 }
 
 function checkAuth() {
   const isAuth = localStorage.getItem('jalwala_auth');
+  const localVer = localStorage.getItem('local_session_ver');
+  const remoteVer = DB.settings.sessionVer || 1;
+  
   const loginPage = document.getElementById('loginPage');
-  if (isAuth === 'true') {
+  if (isAuth === 'true' && localVer == remoteVer) {
     loginPage.style.display = 'none';
   } else {
     loginPage.style.display = 'flex';
   }
+}
+
+function logoutAll() {
+  if(!confirm('क्या आप सभी डिवाइस से लॉगआउट करना चाहते हैं?')) return;
+  DB.settings.sessionVer = (DB.settings.sessionVer || 1) + 1;
+  save();
+  showToast('सभी डिवाइस से लॉगआउट कर दिया गया। दोबारा लॉगिन करें।');
+  setTimeout(() => { location.reload(); }, 1500);
 }
 
 // Call checkAuth as soon as possible

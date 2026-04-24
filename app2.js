@@ -368,6 +368,8 @@ function openSettings(){
   document.getElementById('gitToken').value=DB.settings.gitToken||'';
   document.getElementById('gitRepo').value=DB.settings.gitRepo||'';
   document.getElementById('gitFile').value=DB.settings.gitFile||'data.json';
+  document.getElementById('setAppUser').value=DB.settings.appUser||'7700828989';
+  document.getElementById('setAppPass').value=DB.settings.appPass||'Ajay@1522#';
   document.getElementById('settingsModal').style.display='flex';
 }
 function closeSettings(e){if(e.target.id==='settingsModal')document.getElementById('settingsModal').style.display='none';}
@@ -379,6 +381,12 @@ function saveSettings(){
   DB.settings.gitToken=document.getElementById('gitToken').value.trim();
   DB.settings.gitRepo=document.getElementById('gitRepo').value.trim();
   DB.settings.gitFile=document.getElementById('gitFile').value.trim()||'data.json';
+  
+  const newUser = document.getElementById('setAppUser').value.trim();
+  const newPass = document.getElementById('setAppPass').value.trim();
+  if(newUser) DB.settings.appUser = newUser;
+  if(newPass) DB.settings.appPass = newPass;
+
   save();document.getElementById('settingsModal').style.display='none';showToast('सेटिंग सेव हो गई ✅');
 }
 
