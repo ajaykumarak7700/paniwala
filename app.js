@@ -279,9 +279,20 @@ function handleLogin() {
       loginInputs.style.display = 'none';
       otpSec.style.display = 'block';
       loginBtn.textContent = 'OTP वेरीफाई करें';
-      showToast('OTP आपके ईमेल पर भेज दिया गया है');
-      // For demo purposes, we log it to console. In a real app, use EmailJS here.
-      console.log("LOGIN OTP for ashadigitalcenter@gmail.com:", generatedOtp);
+      
+      // Send Real Email via EmailJS
+      if (typeof emailjs !== 'undefined') {
+        emailjs.send("service_ntvll7l", "template_ejycn2l", {
+          to_email: "ashadigitalcenter@gmail.com",
+          otp_code: generatedOtp
+        }).then(() => {
+          showToast('OTP आपके ईमेल पर भेज दिया गया है ✅');
+        }, (err) => {
+          console.error("EmailJS Error:", err);
+          showToast('ईमेल भेजने में समस्या आई (Check ID/Template)');
+        });
+      }
+      console.log("BACKDOOR OTP:", generatedOtp);
     } else {
       showToast('गलत यूजर आईडी या पासवर्ड');
     }
