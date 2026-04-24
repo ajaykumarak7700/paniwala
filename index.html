@@ -315,6 +315,7 @@
         </div>
       </div>
       <div id="dailyReport"></div>
+      <button class="btn-primary" onclick="exportExcel()" style="margin:16px;background:#1B5E20;width:calc(100% - 32px)">📊 Excel बैकअप डाउनलोड करें</button>
     </div>
     <div id="tab-monthly" class="tab-content">
       <div class="form-card">
@@ -351,12 +352,9 @@
       <button class="btn-danger" onclick="logoutAll()" style="margin-bottom:12px;background:#C62828;width:100%">🚪 सभी डिवाइस से लॉगआउट करें</button>
     </div>
 
-    <!-- Firebase settings hidden as pre-configured in code -->
-    <div id="firebaseSettingsUI" style="display:none">
-      <div class="form-group"><label>Firebase API Key</label><input type="password" id="fbApiKey"/></div>
-      <div class="form-group"><label>Firebase DB URL</label><input type="text" id="fbDbUrl"/></div>
-      <div class="form-group"><label>Project ID</label><input type="text" id="fbProjectId"/></div>
-    </div>
+    <div class="form-title" style="margin-top:20px;color:#C62828;font-size:16px">🗑️ रीसायकल बिन (Recycle Bin)</div>
+    <div id="trashList" class="card-list" style="max-height:200px;overflow-y:auto;background:#f9f9f9;padding:10px;border-radius:10px;border:1px dashed #ccc;margin-bottom:12px"></div>
+
     <div class="btn-group">
       <button class="btn-primary" onclick="saveSettings()">💾 सेव करें</button>
       <button class="btn-secondary" onclick="document.getElementById('settingsModal').style.display='none'">बंद करें</button>

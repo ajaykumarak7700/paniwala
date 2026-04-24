@@ -45,6 +45,7 @@ function save() {
   if (!DB.bookings) DB.bookings = [];
   if (!DB.extraIncome) DB.extraIncome = [];
   if (!DB.extraExpense) DB.extraExpense = [];
+  if (!DB.trash) DB.trash = [];
   if (!DB.settings) DB.settings = {};
 
   localStorage.setItem('jalwala_db', JSON.stringify(DB)); 
@@ -62,6 +63,7 @@ function load() {
   if(!DB.bookings) DB.bookings=[];
   if(!DB.extraIncome) DB.extraIncome=[];
   if(!DB.extraExpense) DB.extraExpense=[];
+  if(!DB.trash) DB.trash = [];
   if(!DB.settings) DB.settings = {};
   if(!DB.settings.appUser) DB.settings.appUser = '7700828989';
   if(!DB.settings.appPass) DB.settings.appPass = 'Ajay@1522#';
@@ -314,9 +316,38 @@ function editBooking(id) {
 }
 
 function deleteBooking(id) {
-  if (!confirm('इस बुकिंग को हटाएं?')) return;
-  DB.bookings = DB.bookings.filter(b => b.id !== id);
-  save(); showToast('बुकिंग हटा दी गई'); renderBookingList(); renderDashboard();
+  if (!confirm('इस बुकिंग को रीसायकल बिन में डालें?')) return;
+  const idx = DB.bookings.findIndex(b => b.id === id);
+  if (idx > -1) {
+    if (!DB.trash) DB.trash = [];
+    DB.trash.unshift(DB.bookings[idx]);
+    DB.bookings.splice(idx, 1);
+    save(); 
+    showToast('बुकिंग रीसायकल बिन में भेज दी गई 🗑️'); 
+    renderBookingList(); 
+    renderDashboard();
+  }
+}
+
+function restoreBooking(id) {
+  const idx = DB.trash.findIndex(b => b.id === id);
+  if (idx > -1) {
+    DB.bookings.unshift(DB.trash[idx]);
+    DB.trash.splice(idx, 1);
+    save();
+    showToast('बुकिंग वापस (Restore) ले ली गई ✅');
+    renderTrash();
+    renderBookingList();
+    renderDashboard();
+  }
+}
+
+function permanentDelete(id) {
+  if (!confirm('सावधान! यह हमेशा के लिए डिलीट हो जाएगा।?')) return;
+  DB.trash = DB.trash.filter(b => b.id !== id);
+  save();
+  showToast('बुकिंग हमेशा के लिए डिलीट कर दी गई');
+  renderTrash();
 }
 
 // ===== AUTHENTICATION =====

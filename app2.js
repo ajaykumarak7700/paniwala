@@ -438,7 +438,8 @@ function openSettings(){
   document.getElementById('fbApiKey').value=DB.settings.fbApiKey||'';
   document.getElementById('fbDbUrl').value=DB.settings.fbDbUrl||'';
   document.getElementById('fbProjectId').value=DB.settings.fbProjectId||'';
-  
+
+  renderTrash(); 
   document.getElementById('settingsModal').style.display='flex';
 }
 function closeSettings(e){if(e.target.id==='settingsModal')document.getElementById('settingsModal').style.display='none';}
@@ -592,3 +593,28 @@ document.addEventListener('click',e=>{
     if(box)box.style.display='none';
   }
 });
+function renderTrash() {
+  const trash = DB.trash || [];
+  const list = document.getElementById('trashList');
+  if(!list) return;
+  
+  if(trash.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:#888;font-size:12px">रीसायकल बिन खाली है</div>';
+    return;
+  }
+  
+  list.innerHTML = trash.map(b => `
+    <div class="booking-card" style="padding:10px;margin-bottom:8px;border-left:4px solid #C62828">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-weight:700;font-size:13px">${b.name}</div>
+          <div style="font-size:11px;color:#666">${fmtDate(b.eventDate)} - ${b.eventType}</div>
+        </div>
+        <div style="display:flex;gap:5px">
+          <button class="btn-primary" onclick="restoreBooking('${b.id}')" style="padding:4px 8px;font-size:10px;background:#2E7D32">Restore</button>
+          <button class="btn-danger" onclick="permanentDelete('${b.id}')" style="padding:4px 8px;font-size:10px;background:#C62828">Del</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
