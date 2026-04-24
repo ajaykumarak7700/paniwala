@@ -24,7 +24,13 @@ function initFirebase() {
       const data = snapshot.val();
       if (data) {
         isRemoteUpdate = true;
+        // Ensure structure is maintained even if remote data is missing parts
         DB = data;
+        if (!DB.bookings) DB.bookings = [];
+        if (!DB.extraIncome) DB.extraIncome = [];
+        if (!DB.extraExpense) DB.extraExpense = [];
+        if (!DB.settings) DB.settings = {};
+        
         localStorage.setItem('jalwala_db', JSON.stringify(DB));
         if (typeof renderDashboard === 'function') renderDashboard();
         if (typeof checkAuth === 'function') checkAuth();
