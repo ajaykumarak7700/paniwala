@@ -1,6 +1,8 @@
 // ===== DATA LAYER =====
 let DB = {
   bookings: [],
+  extraIncome: [],
+  extraExpense: [],
   settings: { 
     bizName:'आशा एंटरप्राइजेस', bizTagline:'शुद्ध जल', bizMobile:'', bizAddress:'', 
     totalJars:50, slipCounter:1,
