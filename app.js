@@ -22,19 +22,19 @@ function initFirebase() {
     // Listen for real-time changes
     firebaseDB.ref('jalwala_data').on('value', (snapshot) => {
       const data = snapshot.val();
-      if (data) {
+      if (data && data.bookings) { // Only sync if remote data is valid
         isRemoteUpdate = true;
-        // Ensure structure is maintained even if remote data is missing parts
         DB = data;
-        if (!DB.bookings) DB.bookings = [];
         if (!DB.extraIncome) DB.extraIncome = [];
         if (!DB.extraExpense) DB.extraExpense = [];
-        if (!DB.settings) DB.settings = {};
-        
         localStorage.setItem('jalwala_db', JSON.stringify(DB));
         if (typeof renderDashboard === 'function') renderDashboard();
         if (typeof checkAuth === 'function') checkAuth();
         setTimeout(() => { isRemoteUpdate = false; }, 1000);
+      } else if (!data && DB.bookings.length > 0) {
+        // If Firebase is empty but we have local data, push local to Firebase
+        console.log("Firebase empty, pushing local data...");
+        firebaseDB.ref('jalwala_data').set(DB);
       }
     });
   }
@@ -49,7 +49,10 @@ function save() {
 
   localStorage.setItem('jalwala_db', JSON.stringify(DB)); 
   if (firebaseDB && !isRemoteUpdate) {
-    firebaseDB.ref('jalwala_data').set(DB);
+    firebaseDB.ref('jalwala_data').set(DB).catch(err => {
+      console.error("Firebase Save Error:", err);
+      showToast("क्लाउड पर सेव नहीं हो सका: " + err.message);
+    });
   }
 }
 
