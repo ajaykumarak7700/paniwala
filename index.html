@@ -344,12 +344,11 @@
       <button class="btn-danger" onclick="logoutAll()" style="margin-bottom:12px;background:#C62828;width:100%">🚪 सभी डिवाइस से लॉगआउट करें</button>
     </div>
 
-    <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px">
-      <div class="modal-title" style="font-size:16px;color:#1565C0">🔥 Firebase क्लाउड सर्वर</div>
-      <p style="font-size:10px;color:#666;margin-bottom:10px">डेटा को सभी डिवाइस पर तुरंत सिंक करने के लिए Firebase Config डालें।</p>
-      <div class="form-group"><label>Firebase API Key</label><input type="password" id="fbApiKey" placeholder="AIza..."/></div>
-      <div class="form-group"><label>Firebase DB URL</label><input type="text" id="fbDbUrl" placeholder="https://your-app.firebaseio.com"/></div>
-      <div class="form-group"><label>Project ID</label><input type="text" id="fbProjectId" placeholder="your-project-id"/></div>
+    <!-- Firebase settings hidden as pre-configured in code -->
+    <div id="firebaseSettingsUI" style="display:none">
+      <div class="form-group"><label>Firebase API Key</label><input type="password" id="fbApiKey"/></div>
+      <div class="form-group"><label>Firebase DB URL</label><input type="text" id="fbDbUrl"/></div>
+      <div class="form-group"><label>Project ID</label><input type="text" id="fbProjectId"/></div>
     </div>
     <div class="btn-group">
       <button class="btn-primary" onclick="saveSettings()">💾 सेव करें</button>
