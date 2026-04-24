@@ -118,7 +118,7 @@ function openIncomeModal(){
   document.getElementById('incomeDate').value=today();
   document.getElementById('incomeModal').style.display='flex';
 }
-function closeIncomeModal(e){if(e.target.id==='incomeModal')document.getElementById('incomeModal').style.display='none';}
+function closeIncomeModal(e){if(e.target && e.target.id==='incomeModal')document.getElementById('incomeModal').style.display='none';}
 function saveExtraIncome(){
   if (!checkPin()) return;
   try {
@@ -343,27 +343,11 @@ function renderCustomerReport(){
     </div>`).join(''):emptyHTML('👤','कोई ग्राहक नहीं');
 }
 
-// ===== MODALS =====
-function openIncomeModal(){
-  document.getElementById('incomeDate').value=today();
-  document.getElementById('incomeAmount').value='';
-  document.getElementById('incomeNote').value='';
-  document.getElementById('incomeModal').style.display='flex';
-}
-function closeIncomeModal(e){if(e.target.id==='incomeModal')document.getElementById('incomeModal').style.display='none';}
-function saveExtraIncome(){
-  const amt=parseFloat(document.getElementById('incomeAmount').value);
-  if(!amt || amt<=0){showToast('राशि दर्ज करें');return;}
-  const dt=document.getElementById('incomeDate').value || today();
-  const note=document.getElementById('incomeNote').value.trim() || 'फुटकर बिक्री';
-  DB.extraIncome.push({ id:uid(), date:dt, amount:amt, note:note });
-  save(); document.getElementById('incomeModal').style.display='none';
-  showToast('आय सेव हो गई ✅'); renderDashboard();
-}
-
+// MODALS are handled at the top
 function openPayModal(id){document.getElementById('payBookingId').value=id;document.getElementById('payAmount').value='';document.getElementById('payModal').style.display='flex';}
 function closePayModal(e){if(e.target.id==='payModal')document.getElementById('payModal').style.display='none';}
 function savePayment(){
+  if (!checkPin()) return;
   const id=document.getElementById('payBookingId').value;
   const amt=parseFloat(document.getElementById('payAmount').value);
   if(!amt||amt<=0){showToast('राशि दर्ज करें');return;}
@@ -384,6 +368,7 @@ function openJarModal(id){
 function closeJarModal(e){if(e.target.id==='jarModal')document.getElementById('jarModal').style.display='none';}
 function closeSuccessModal(e){if(e.target.id==='successModal')document.getElementById('successModal').style.display='none';}
 function saveJarReturn(){
+  if (!checkPin()) return;
   const id=document.getElementById('jarBookingId').value;
   const jR=parseInt(document.getElementById('jarsReturned').value) || 0;
   const bR=parseInt(document.getElementById('bottlesReturned').value) || 0;
