@@ -545,10 +545,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   if (typeof checkDateAvailability === 'function') checkDateAvailability();
   renderDashboard();
   
-  // Auto-sync from cloud on startup
-  if(DB.settings.gitToken && DB.settings.gitRepo) {
-    setTimeout(syncWithGitHub, 1000);
-  }
+  // Auto-sync from cloud on startup - Handled by Firebase listener in app.js
 });
 document.addEventListener('click',e=>{
   if(!e.target.closest('.form-group')){
