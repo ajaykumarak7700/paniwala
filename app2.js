@@ -404,6 +404,7 @@ function openSellModal(){
 }
 function closeSellModal(e){if(e.target.id==='sellModal')document.getElementById('sellModal').style.display='none';}
 function saveSell(){
+  if (!checkPin()) return;
   const sJ=parseInt(document.getElementById('sellJars').value) || 0;
   const sB=parseInt(document.getElementById('sellBottles').value) || 0;
   const amt=parseFloat(document.getElementById('sellAmount').value) || 0;
