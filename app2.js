@@ -493,11 +493,11 @@ function shareWhatsApp(id){
 
 // ===== EXPORT/IMPORT =====
 function exportExcel(){
-  if(!DB.bookings.length){showToast('डाउनलोड करने के लिए कोई डेटा नहीं है');return;}
-  const header = ['पर्ची नं','बुकिंग दिनांक','ग्राहक','मोबाइल','पता','कार्यक्रम','कार्यक्रम तिथि','कैम्पर/पानी(L)','जार','बोतल','कुल राशि','एडवांस','बकाया','नोट्स'];
+  if(!DB.bookings.length && !DB.extraIncome.length && !DB.extraExpense.length){showToast('डाउनलोड करने के लिए कोई डेटा नहीं है');return;}
+  const header = ['पर्ची नं','बुकिंग दिनांक','ग्राहक','मोबाइल','पता','कार्यक्रम','कार्यक्रम तिथि','पानी(L)','जार','बोतल','कुल राशि','एडवांस','बकाया','नोट्स'];
   const rows = DB.bookings.map(b => [
     b.slipNo, b.bookingDate, `"${b.name}"`, b.mobile, `"${b.address||''}"`, `"${b.eventType}"`,
-    b.eventDate, b.water||0, b.jars||0, b.bottles||0, b.total, b.paid, b.remain, `"${b.notes||''}"`
+    b.eventDate, b.water||0, b.jars||0, b.bottles||0, b.total, b.paid||b.advance||0, b.remain, `"${b.notes||''}"`
   ]);
   
   if(DB.extraIncome && DB.extraIncome.length){
