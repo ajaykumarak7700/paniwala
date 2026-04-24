@@ -281,7 +281,12 @@ function handleLogin() {
     localStorage.setItem('jalwala_auth', 'true');
     localStorage.setItem('local_session_ver', DB.settings.sessionVer || 1);
     document.getElementById('loginPage').style.display = 'none';
-    showToast('लॉगिन सफल! स्वागत है ✅');
+    showToast('लॉगिन सफल! डेटा सिंक हो रहा है... ⏳');
+    
+    // Auto-sync immediately after login
+    if (typeof syncWithGitHub === 'function') {
+      setTimeout(syncWithGitHub, 500);
+    }
   } else {
     showToast('गलत यूजर आईडी या पासवर्ड');
   }
