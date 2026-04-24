@@ -168,3 +168,16 @@ body{font-family:'Noto Sans Devanagari',sans-serif;background:var(--bg);color:va
 .cal-cell.has-booking .cal-date{color:#1B5E20}
 .cal-cell.has-booking.heavy-box{background:linear-gradient(135deg,#FFEBEE,#FFCDD2);border-color:#E57373;box-shadow:0 3px 8px rgba(244,67,54,.2)}
 .cal-cell.has-booking.heavy-box .cal-date{color:#B71C1C}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 500px) {
+  .calendar-banner { padding: 10px 6px; margin-bottom: 10px; }
+  .cal-header { margin-bottom: 8px; }
+  .cal-title { font-size: 14px; }
+  .cal-header button { width: 28px; height: 28px; font-size: 12px; }
+  .cal-days-header { font-size: 9px; margin-bottom: 4px; }
+  .cal-grid { gap: 3px; }
+  .cal-cell { min-height: 38px; padding: 2px 1px; border-radius: 6px; }
+  .cal-date { font-size: 11px; margin-bottom: 1px; }
+  .cal-badge { font-size: 7px; padding: 1px 2px; border-radius: 4px; }
+}
