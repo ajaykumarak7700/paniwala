@@ -570,27 +570,63 @@ function shareWhatsApp(id){
 }
 
 // ===== EXPORT/IMPORT =====
-function exportExcel(){
-  if(!DB.bookings.length && !DB.extraIncome.length && !DB.extraExpense.length){showToast('डाउनलोड करने के लिए कोई डेटा नहीं है');return;}
-  const header = ['पर्ची नं','बुकिंग दिनांक','ग्राहक','मोबाइल','पता','कार्यक्रम','कार्यक्रम तिथि','पानी(L)','जार','बोतल','कुल राशि','एडवांस','बकाया','नोट्स'];
-  const rows = DB.bookings.map(b => [
+function exportExcel(type = 'full'){
+  let bookings = [];
+  let income = [];
+  let expense = [];
+  let fileName = 'jalwala_backup';
+
+  if (type === 'daily') {
+    const d = document.getElementById('reportDate')?.value || today();
+    bookings = DB.bookings.filter(b => b.bookingDate === d);
+    income = (DB.extraIncome || []).filter(i => i.date === d);
+    expense = (DB.extraExpense || []).filter(e => e.date === d);
+    fileName = 'daily_report_' + d;
+  } else if (type === 'monthly') {
+    const m = document.getElementById('reportMonth')?.value || monthStr();
+    bookings = DB.bookings.filter(b => b.bookingDate?.startsWith(m));
+    income = (DB.extraIncome || []).filter(i => i.date?.startsWith(m));
+    expense = (DB.extraExpense || []).filter(e => e.date?.startsWith(m));
+    fileName = 'monthly_report_' + m;
+  } else {
+    bookings = DB.bookings;
+    income = DB.extraIncome || [];
+    expense = DB.extraExpense || [];
+    fileName = 'full_backup_' + today();
+  }
+
+  if(!bookings.length && !income.length && !expense.length){
+    showToast('डाउनलोड करने के लिए कोई डेटा नहीं है');
+    return;
+  }
+
+  const header = ['पर्ची नं','बुकिंग दिनांक','ग्राहक','मोबाइल','पता','कार्यक्रम','कार्यक्रम तिथि','पानी(L)','जार','बोतल','कुल राशि','एडवांस','बकाया','नोट्स','स्थिति'];
+  const rows = bookings.map(b => [
     b.slipNo, b.bookingDate, `"${b.name}"`, b.mobile, `"${b.address||''}"`, `"${b.eventType}"`,
-    b.eventDate, b.water||0, b.jars||0, b.bottles||0, b.total, b.paid||b.advance||0, b.remain, `"${b.notes||''}"`
+    b.eventDate, b.water||0, b.jars||0, b.bottles||0, b.total, b.paid||b.advance||0, b.remain, `"${b.notes||''}"`,
+    b.isConfirmed ? 'कन्फर्म' : 'पेंडिंग'
   ]);
   
-  if(DB.extraIncome && DB.extraIncome.length){
+  if(income.length){
     rows.push([]);
-    rows.push(['---','---','---','---','---','---','---','---','---','---','---','---','---','---']);
     rows.push(['फुटकर बिक्री / अन्य आय']);
     rows.push(['दिनांक', 'विवरण', 'राशि']);
-    DB.extraIncome.forEach(i => rows.push([i.date, `"${i.note}"`, i.amount]));
+    income.forEach(i => rows.push([i.date, `"${i.note}"`, i.amount]));
+  }
+
+  if(expense.length){
+    rows.push([]);
+    rows.push(['अन्य खर्च (Expenses)']);
+    rows.push(['दिनांक', 'विवरण', 'राशि']);
+    expense.forEach(e => rows.push([e.date, `"${e.note}"`, e.amount]));
   }
 
   const csv = '\uFEFF' + [header, ...rows].map(r => r.join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'jalwala_sata_backup_' + today() + '.csv';
+  a.download = fileName + '.csv';
   a.click();
+  showToast('Excel फ़ाइल डाउनलोड हो रही है... ✅');
 }
 
 function exportData(){

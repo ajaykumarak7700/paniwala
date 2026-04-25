@@ -325,7 +325,10 @@
         </div>
       </div>
       <div id="dailyReport"></div>
-      <button class="btn-primary" onclick="exportExcel()" style="margin:16px;background:#1B5E20;width:calc(100% - 32px)">📊 Excel बैकअप डाउनलोड करें</button>
+      <div style="display:flex;gap:10px;margin:16px">
+        <button class="btn-primary" onclick="exportExcel('daily')" style="background:#2E7D32;flex:1">📊 दैनिक रिपोर्ट (Excel)</button>
+        <button class="btn-primary" onclick="exportExcel('full')" style="background:#1565C0;flex:1">💾 सभी बुकिंग बैकअप</button>
+      </div>
     </div>
     <div id="tab-monthly" class="tab-content">
       <div class="form-card">
@@ -335,6 +338,7 @@
         </div>
       </div>
       <div id="monthlyReport"></div>
+      <button class="btn-primary" onclick="exportExcel('monthly')" style="margin:16px;background:#2E7D32;width:calc(100% - 32px)">📊 इस महीने की रिपोर्ट (Excel)</button>
     </div>
     <div id="tab-customer" class="tab-content">
       <div class="search-bar">
