@@ -69,6 +69,8 @@ function load() {
   if(!DB.settings.appPass) DB.settings.appPass = 'Ajay@1522#';
   if(!DB.settings.sessionVer) DB.settings.sessionVer = 1;
   if(!DB.settings.slipCounter) DB.settings.slipCounter = 1;
+  if(!DB.settings.totalJars) DB.settings.totalJars = 50;
+  if(!DB.settings.totalBottles) DB.settings.totalBottles = 0;
   
   // Pre-configure Firebase if missing
   if(!DB.settings.fbApiKey) DB.settings.fbApiKey = 'AIzaSyDm6Fyz0GukJmanTWJAjCzsHyTdZPptJ18';
