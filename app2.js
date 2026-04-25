@@ -20,6 +20,7 @@ function bookingCardHTML(b){
       <span>✅ ₹${b.paid}</span><span style="color:var(--red)">⏳ ₹${b.remain}</span>
     </div>
     <div class="card-actions">
+      ${!b.isConfirmed ? `<button class="action-btn" onclick="confirmBooking('${b.id}')" style="background:var(--blue);color:#fff;flex:2">✅ गाड़ी कन्फर्म</button>` : `<span class="action-btn" style="background:#E8F5E9;color:#2E7D32;flex:2;cursor:default">✅ कन्फर्म</span>`}
       <button class="action-btn btn-pdf" onclick="generatePDF('${b.id}')">📄 PDF</button>
       <button class="action-btn btn-wa" onclick="shareWhatsApp('${b.id}')">💬 WA</button>
       <button class="action-btn btn-pay" onclick="openPayModal('${b.id}')">💰 भुगतान</button>
@@ -57,8 +58,9 @@ function renderDashboard(){
   const monthExp = (DB.extraExpense||[]).filter(e=>e.date?.startsWith(m)).reduce((s,e)=>s+e.amount,0);
 
   const monthE=DB.bookings.filter(b=>b.bookingDate?.startsWith(m)).reduce((s,b)=>s+b.total,0);
-  const itemsOut=DB.bookings.reduce((s,b)=>s+(b.jars-(b.jarsReturned||0))+(b.bottles-(b.bottlesReturned||0)),0);
-  const pendingItems=DB.bookings.filter(b=>(b.jars-(b.jarsReturned||0))>0 || (b.bottles-(b.bottlesReturned||0))>0).length;
+  const confirmedB = DB.bookings.filter(b => b.isConfirmed);
+  const itemsOut=confirmedB.reduce((s,b)=>s+(b.jars-(b.jarsReturned||0))+(b.bottles-(b.bottlesReturned||0)),0);
+  const pendingItems=confirmedB.filter(b=>(b.jars-(b.jarsReturned||0))>0 || (b.bottles-(b.bottlesReturned||0))>0).length;
 
   document.getElementById('statTodayBookings').textContent=todayB.length;
   document.getElementById('statTodayEarning').textContent='₹'+(todayE + todayExtra - todayExp);
@@ -236,8 +238,9 @@ function openCalDate(dStr) {
 function renderJars(){
   // Jar Stats
   const jTotal=DB.settings.totalJars||0;
-  const jOut=DB.bookings.reduce((s,b)=>s+(b.jars||0),0);
-  const jRet=DB.bookings.reduce((s,b)=>s+(b.jarsReturned||0),0);
+  const confirmedB_jars = DB.bookings.filter(b => b.isConfirmed);
+  const jOut=confirmedB_jars.reduce((s,b)=>s+(b.jars||0),0);
+  const jRet=confirmedB_jars.reduce((s,b)=>s+(b.jarsReturned||0),0);
   document.getElementById('jarTotal').textContent=jTotal;
   document.getElementById('jarOut').textContent=jOut;
   document.getElementById('jarReturned').textContent=jRet;
@@ -246,8 +249,9 @@ function renderJars(){
   
   // Bottle Stats
   const bTotal=DB.settings.totalBottles||0;
-  const bOut=DB.bookings.reduce((s,b)=>s+(b.bottles||0),0);
-  const bRet=DB.bookings.reduce((s,b)=>s+(b.bottlesReturned||0),0);
+  const confirmedB = DB.bookings.filter(b => b.isConfirmed);
+  const bOut=confirmedB.reduce((s,b)=>s+(b.bottles||0),0);
+  const bRet=confirmedB.reduce((s,b)=>s+(b.bottlesReturned||0),0);
   if(document.getElementById('bottleTotal')) document.getElementById('bottleTotal').textContent=bTotal;
   if(document.getElementById('bottleOut')) document.getElementById('bottleOut').textContent=bOut;
   if(document.getElementById('bottleReturned')) document.getElementById('bottleReturned').textContent=bRet;
@@ -255,7 +259,7 @@ function renderJars(){
   if(document.getElementById('setTotalBottles')) document.getElementById('setTotalBottles').value=bTotal;
 
   // Track List
-  const list=DB.bookings.filter(b=>(b.jars-(b.jarsReturned||0))>0 || (b.bottles-(b.bottlesReturned||0))>0);
+  const list=confirmedB.filter(b=>(b.jars-(b.jarsReturned||0))>0 || (b.bottles-(b.bottlesReturned||0))>0);
   const el=document.getElementById('jarTrackList');
   if(el) el.innerHTML=list.length?list.map(b=>
     `<div class="booking-card partial">
@@ -411,6 +415,18 @@ function saveSell(){
   document.getElementById('sellModal').style.display='none';
   showToast('बिक्री सेव हो गई ✅');
   renderDashboard();
+}
+
+function confirmBooking(id){
+  if(!confirm('क्या आप इस साटा को कन्फर्म करना चाहते हैं? इसके बाद जार बाहर में जोड़ दिए जाएंगे।')) return;
+  const idx=DB.bookings.findIndex(b=>b.id===id);
+  if(idx<0) return;
+  DB.bookings[idx].isConfirmed=true;
+  save();
+  showToast('बुकिंग कन्फर्म हो गई ✅');
+  renderDashboard();
+  renderBookingList();
+  if(currentPage==='jars') renderJars();
 }
 
 // ===== SETTINGS =====

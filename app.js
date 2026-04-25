@@ -260,6 +260,7 @@ function saveBooking() {
       remain: Math.max(0, total - adv),
       notes: document.getElementById('bookingNotes')?.value?.trim() || '',
       jarsReturned: 0,
+      isConfirmed: false,
       payments: adv > 0 ? [{ date: today(), amount: adv }] : []
     };
 
