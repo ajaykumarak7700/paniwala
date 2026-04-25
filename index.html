@@ -346,6 +346,13 @@
     <div class="form-group"><label>पता</label><textarea id="bizAddress" rows="2" placeholder="व्यवसाय का पता"></textarea></div>
     
     <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px">
+      <div class="modal-title" style="font-size:16px;color:#1565C0">☁️ क्लाउड सिंक (Firebase)</div>
+      <div class="form-group"><label>Firebase API Key</label><input type="text" id="fbApiKey" placeholder="API Key"/></div>
+      <div class="form-group"><label>Database URL</label><input type="text" id="fbDbUrl" placeholder="https://..."/></div>
+      <div class="form-group"><label>Project ID</label><input type="text" id="fbProjectId" placeholder="Project ID"/></div>
+    </div>
+
+    <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px">
       <div class="modal-title" style="font-size:16px;color:#1565C0">🔒 सुरक्षा सेटिंग</div>
       <div class="form-group"><label>यूजर आईडी</label><input type="text" id="setAppUser" placeholder="admin"/></div>
       <div class="form-group"><label>नया पासवर्ड</label><input type="password" id="setAppPass" placeholder="पासवर्ड बदलें"/></div>
@@ -527,33 +534,6 @@
   </div>
 </div>
 
-  <!-- Other Income Modal -->
-  <div id="incomeModal" class="modal-overlay" style="display:none" onclick="closeIncomeModal(event)">
-    <div class="modal-box">
-      <div class="modal-title">➕ अन्य आय (Other Income)</div>
-      <div class="form-group"><label>आय की राशि (₹)</label><input type="number" id="incomeAmount" placeholder="0"/></div>
-      <div class="form-group"><label>विवरण (Notes)</label><input type="text" id="incomeNote" placeholder="जैसे: खाली बोतल बिक्री"/></div>
-      <div class="form-group"><label>दिनांक</label><input type="date" id="incomeDate"/></div>
-      <div class="btn-group">
-        <button class="btn-primary" onclick="saveExtraIncome()" style="background:#2E7D32">✅ आय सेव करें</button>
-        <button class="btn-secondary" onclick="document.getElementById('incomeModal').style.display='none'">बंद करें</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Other Expense Modal -->
-  <div id="expenseModal" class="modal-overlay" style="display:none" onclick="closeExpenseModal(event)">
-    <div class="modal-box">
-      <div class="modal-title">📉 अन्य खर्च (Other Expense)</div>
-      <div class="form-group"><label>खर्च की राशि (₹)</label><input type="number" id="expenseAmount" placeholder="0"/></div>
-      <div class="form-group"><label>विवरण (Notes)</label><input type="text" id="expenseNote" placeholder="जैसे: पेट्रोल, बिजली बिल"/></div>
-      <div class="form-group"><label>दिनांक</label><input type="date" id="expenseDate"/></div>
-      <div class="btn-group">
-        <button class="btn-primary" onclick="saveExtraExpense()" style="background:#C62828">📉 खर्च सेव करें</button>
-        <button class="btn-secondary" onclick="document.getElementById('expenseModal').style.display='none'">बंद करें</button>
-      </div>
-    </div>
-  </div>
 
 <script src="app.js"></script>
 <script src="app2.js"></script>
