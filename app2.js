@@ -57,7 +57,14 @@ function renderDashboard(){
   const todayExp = (DB.extraExpense||[]).filter(e=>e.date===t).reduce((s,e)=>s+e.amount,0);
   const monthExp = (DB.extraExpense||[]).filter(e=>e.date?.startsWith(m)).reduce((s,e)=>s+e.amount,0);
 
-  const monthE=DB.bookings.filter(b=>b.bookingDate?.startsWith(m)).reduce((s,b)=>s+b.total,0);
+  let monthE = 0;
+  DB.bookings.forEach(b => {
+    if (b.payments) {
+      b.payments.forEach(p => {
+        if (p.date && p.date.startsWith(m)) monthE += p.amount;
+      });
+    }
+  });
   const confirmedB = DB.bookings.filter(b => b.isConfirmed);
   const itemsOut=confirmedB.reduce((s,b)=>s+(b.jars-(b.jarsReturned||0))+(b.bottles-(b.bottlesReturned||0)),0);
   const pendingItems=confirmedB.filter(b=>(b.jars-(b.jarsReturned||0))>0 || (b.bottles-(b.bottlesReturned||0))>0).length;
