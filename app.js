@@ -162,8 +162,10 @@ function checkDateAvailability() {
     
     const maxJars = DB.settings.totalJars || 0;
     if (maxJars > 0 && sumJars >= maxJars) {
+      txt.innerHTML += `<br/><b style="color:red">⚠️ चेतावनी: इस तारीख के लिए स्टॉक (Jars) फुल है!</b>`;
       box.style.background = "#FFEBEE"; box.style.borderColor = "#EF9A9A"; box.style.color = "#C62828";
     } else if (maxJars > 0 && sumJars > (maxJars * 0.7)) {
+      txt.innerHTML += `<br/><b style="color:orange">⚠️ चेतावनी: स्टॉक कम बचा है।</b>`;
       box.style.background = "#FFF3E0"; box.style.borderColor = "#FFCC80"; box.style.color = "#E65100";
     } else {
       box.style.background = "#E3F2FD"; box.style.borderColor = "#90CAF9"; box.style.color = "#1565C0";
@@ -227,6 +229,21 @@ function saveBooking() {
     const tInput = document.getElementById('totalAmountInput');
     const total = parseFloat(tInput?.value) || 0;
     const editId = document.getElementById('editId')?.value || '';
+
+    // Stock check for that date
+    const bksOnDate = DB.bookings.filter(b => b.eventDate === eventDate && b.id !== editId);
+    const sumJarsOnDate = bksOnDate.reduce((s, b) => s + (b.jars || 0), 0);
+    const sumBottlesOnDate = bksOnDate.reduce((s, b) => s + (b.bottles || 0), 0);
+    
+    const maxJars = DB.settings.totalJars || 0;
+    const maxBottles = DB.settings.totalBottles || 0;
+
+    if (maxJars > 0 && (sumJarsOnDate + jars) > maxJars) {
+      if(!confirm(`⚠️ चेतावनी: इस तारीख पर कुल ${sumJarsOnDate + jars} जार बुक हो रहे हैं, जबकि आपके पास केवल ${maxJars} जार हैं। क्या आप फिर भी सेव करना चाहते हैं?`)) return;
+    }
+    if (maxBottles > 0 && (sumBottlesOnDate + bottles) > maxBottles) {
+      if(!confirm(`⚠️ चेतावनी: इस तारीख पर कुल ${sumBottlesOnDate + bottles} बोतल बुक हो रही हैं, जबकि आपके पास केवल ${maxBottles} बोतल हैं। क्या आप फिर भी सेव करना चाहते हैं?`)) return;
+    }
 
     if (editId) {
       const idx = DB.bookings.findIndex(b => b.id === editId);

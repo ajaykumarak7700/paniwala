@@ -418,9 +418,32 @@ function saveSell(){
 }
 
 function confirmBooking(id){
-  if(!confirm('क्या आप इस साटा को कन्फर्म करना चाहते हैं? इसके बाद जार बाहर में जोड़ दिए जाएंगे।')) return;
   const idx=DB.bookings.findIndex(b=>b.id===id);
   if(idx<0) return;
+  const b = DB.bookings[idx];
+
+  // Calculate current global stock availability
+  const confirmedB = DB.bookings.filter(x => x.isConfirmed);
+  const currentJarsOut = confirmedB.reduce((s, x) => s + (x.jars - (x.jarsReturned || 0)), 0);
+  const currentBottlesOut = confirmedB.reduce((s, x) => s + (x.bottles - (x.bottlesReturned || 0)), 0);
+  
+  const totalJars = DB.settings.totalJars || 0;
+  const totalBottles = DB.settings.totalBottles || 0;
+  
+  const availableJars = totalJars - currentJarsOut;
+  const availableBottles = totalBottles - currentBottlesOut;
+
+  if (b.jars > availableJars) {
+    alert(`❌ स्टॉक में जार उपलब्ध नहीं हैं!\n\nकुल स्टॉक: ${totalJars}\nबाहर: ${currentJarsOut}\nउपलब्ध: ${availableJars}\nजरूरत: ${b.jars}`);
+    return;
+  }
+  if (b.bottles > availableBottles) {
+    alert(`❌ स्टॉक में बोतल उपलब्ध नहीं हैं!\n\nकुल स्टॉक: ${totalBottles}\nबाहर: ${currentBottlesOut}\nउपलब्ध: ${availableBottles}\nजरूरत: ${b.bottles}`);
+    return;
+  }
+
+  if(!confirm('क्या आप इस साटा को कन्फर्म करना चाहते हैं? इसके बाद जार बाहर में जोड़ दिए जाएंगे।')) return;
+  
   DB.bookings[idx].isConfirmed=true;
   save();
   showToast('बुकिंग कन्फर्म हो गई ✅');
