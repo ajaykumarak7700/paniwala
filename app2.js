@@ -324,17 +324,59 @@ function renderDailyReport(){
 
 function renderMonthlyReport(){
   const m=document.getElementById('reportMonth')?.value||monthStr();
-  const list=DB.bookings.filter(b=>b.bookingDate?.startsWith(m));
   const el=document.getElementById('monthlyReport');
   if(!el)return;
-  if(!list.length){el.innerHTML=emptyHTML('📊','इस माह कोई बुकिंग नहीं');return;}
-  const total=list.reduce((s,b)=>s+b.total,0),paid=list.reduce((s,b)=>s+b.paid,0);
+
+  // 1. Cash from Bookings (Payments made this month)
+  let cashFromBookings = 0;
+  DB.bookings.forEach(b => {
+    if (b.payments) {
+      b.payments.forEach(p => {
+        if (p.date && p.date.startsWith(m)) cashFromBookings += p.amount;
+      });
+    }
+  });
+
+  // 2. Extra Income this month
+  const extraInc = (DB.extraIncome||[]).filter(i=>i.date?.startsWith(m)).reduce((s,i)=>s+i.amount,0);
+  
+  // 3. Extra Expense this month
+  const extraExp = (DB.extraExpense||[]).filter(e=>e.date?.startsWith(m)).reduce((s,e)=>s+e.amount,0);
+
+  // 4. Bookings created this month (for context)
+  const bookingsCreated = DB.bookings.filter(b=>b.bookingDate?.startsWith(m));
+  const totalBookedAmount = bookingsCreated.reduce((s,b)=>s+b.total,0);
+
+  const totalRevenue = cashFromBookings + extraInc;
+  const netProfit = totalRevenue - extraExp;
+
+  if (!totalRevenue && !extraExp && !bookingsCreated.length) {
+    el.innerHTML = emptyHTML('📊', 'इस माह का कोई डेटा नहीं है');
+    return;
+  }
+
   el.innerHTML=`<div class="report-card">
-    <div class="report-row"><span>📋 कुल बुकिंग</span><span>${list.length}</span></div>
-    <div class="report-row"><span>💰 कुल राशि</span><span>₹${total}</span></div>
-    <div class="report-row"><span>✅ प्राप्त</span><span>₹${paid}</span></div>
-    <div class="report-row"><span>⏳ बकाया</span><span>₹${total-paid}</span></div>
-    <div class="report-row"><span>🫙 कुल जार</span><span>${list.reduce((s,b)=>s+b.jars,0)}</span></div>
+    <div class="modal-title" style="font-size:16px;color:var(--blue);margin-bottom:12px;border-bottom:2px solid var(--blue-light);padding-bottom:8px">📊 ${m} का रिपोर्ट</div>
+    
+    <div class="report-row"><span>💵 बुकिंग से नकद प्राप्त</span><span>₹${cashFromBookings}</span></div>
+    <div class="report-row"><span>📈 अन्य आय (Extra)</span><span>₹${extraInc}</span></div>
+    <div class="report-row" style="border-bottom:1px solid #ddd;margin-bottom:8px;font-weight:700">
+      <span>💰 कुल कमाई (Revenue)</span>
+      <span style="color:var(--green)">₹${totalRevenue}</span>
+    </div>
+    
+    <div class="report-row"><span>📉 अन्य खर्च (Expenses)</span><span style="color:var(--red)">- ₹${extraExp}</span></div>
+    
+    <div class="report-row" style="font-size:16px;background:var(--blue-light);padding:12px;border-radius:12px;margin-top:10px;border:none">
+      <span style="font-weight:800">💎 शुद्ध लाभ (Profit)</span>
+      <span style="font-weight:800;color:var(--blue)">₹${netProfit}</span>
+    </div>
+
+    <div style="margin-top:20px;padding:12px;background:#f9f9f9;border-radius:10px;border:1px dashed #ccc">
+      <div style="font-size:11px;color:#666;font-weight:700;margin-bottom:5px;text-transform:uppercase">मासिक बुकिंग सारांश:</div>
+      <div class="report-row" style="border:none;padding:2px 0;font-size:12px"><span>📋 कुल नई बुकिंग</span><span>${bookingsCreated.length}</span></div>
+      <div class="report-row" style="border:none;padding:2px 0;font-size:12px"><span>🏢 कुल बुक राशि</span><span>₹${totalBookedAmount}</span></div>
+    </div>
   </div>`;
 }
 
