@@ -519,7 +519,7 @@ function openSettings(){
     if(el) {
       el.value = DB.settings[id] || '';
       el.type = 'password';
-      el.setAttribute('readonly', 'true');
+      el.disabled = true;
     }
   });
   if(document.getElementById('unlockFbBtn')) document.getElementById('unlockFbBtn').style.display = 'block';
@@ -529,6 +529,7 @@ function openSettings(){
 }
 function closeSettings(e){if(e.target.id==='settingsModal')document.getElementById('settingsModal').style.display='none';}
 function saveSettings(){
+  if (!checkPin()) return;
   DB.settings.bizName=document.getElementById('bizName').value.trim()||'आशा एंटरप्राइजेस';
   DB.settings.bizTagline=document.getElementById('bizTagline').value.trim()||'शुद्ध जल';
   DB.settings.bizMobile=document.getElementById('bizMobile').value.trim();
@@ -558,7 +559,7 @@ function unlockFirebaseSettings() {
     const el = document.getElementById(id);
     if(el) {
       el.type = 'text';
-      el.removeAttribute('readonly');
+      el.disabled = false;
     }
   });
   if(document.getElementById('unlockFbBtn')) document.getElementById('unlockFbBtn').style.display = 'none';
