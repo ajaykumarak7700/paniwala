@@ -20,7 +20,7 @@ function bookingCardHTML(b){
       <span>✅ ₹${b.paid}</span><span style="color:var(--red)">⏳ ₹${b.remain}</span>
     </div>
     <div class="card-actions">
-      ${!b.isConfirmed ? `<button class="action-btn" onclick="confirmBooking('${b.id}')" style="background:var(--blue);color:#fff;flex:2">✅ गाड़ी कन्फर्म</button>` : `<span class="action-btn" style="background:#E8F5E9;color:#2E7D32;flex:2;cursor:default">✅ कन्फर्म</span>`}
+      ${!b.isConfirmed ? `<button class="action-btn" onclick="confirmBooking('${b.id}')" style="background:var(--blue);color:#fff;flex:2">✅ गाड़ी कन्फर्म</button>` : (((b.jars - (b.jarsReturned||0) > 0) || (b.bottles - (b.bottlesReturned||0) > 0)) ? `<button class="action-btn" onclick="returnAllItems('${b.id}')" style="background:var(--orange);color:#fff;flex:2">📦 सब वापस</button>` : `<span class="action-btn" style="background:#E8F5E9;color:#2E7D32;flex:2;cursor:default">✅ सब वापस</span>`)}
       <button class="action-btn btn-pdf" onclick="generatePDF('${b.id}')">📄 PDF</button>
       <button class="action-btn btn-wa" onclick="shareWhatsApp('${b.id}')">💬 WA</button>
       <button class="action-btn btn-pay" onclick="openPayModal('${b.id}')">💰 भुगतान</button>
@@ -501,6 +501,22 @@ function confirmBooking(id){
   renderDashboard();
   renderBookingList();
   if(currentPage==='jars') renderJars();
+}
+
+function returnAllItems(id){
+  const idx=DB.bookings.findIndex(b=>b.id===id);
+  if(idx<0) return;
+  const b = DB.bookings[idx];
+  if(b.jarsReturned >= b.jars && b.bottlesReturned >= b.bottles) return;
+  if(!confirm('क्या सभी जार और बोतलें वापस आ गई हैं?')) return;
+  
+  DB.bookings[idx].jarsReturned = b.jars || 0;
+  DB.bookings[idx].bottlesReturned = b.bottles || 0;
+  save();
+  showToast('सभी सामान अंदर जुड़ गए ✅');
+  renderDashboard();
+  renderBookingList();
+  if(typeof renderJars === 'function') renderJars();
 }
 
 // ===== SETTINGS =====
