@@ -65,8 +65,10 @@ function renderDashboard(){
   document.getElementById('statTodayBookings').textContent=todayB.length;
   document.getElementById('statTodayEarning').textContent='₹'+(todayE + todayExtra - todayExp);
   document.getElementById('statPending').textContent='₹'+pending;
-  document.getElementById('statJarsOut').textContent=itemsOut;
   document.getElementById('statMonthEarning').textContent='₹'+(monthE + monthExtra - monthExp);
+  document.getElementById('statTotalJars').textContent = DB.settings.totalJars || 0;
+  document.getElementById('statTotalBottles').textContent = DB.settings.totalBottles || 0;
+  document.getElementById('statJarsOut').textContent=itemsOut;
   document.getElementById('statPendingJars').textContent=pendingItems;
 
   const reminders=[];
