@@ -505,7 +505,6 @@ function confirmBooking(id){
 
 // ===== SETTINGS =====
 function openSettings(){
-  if (!checkPin()) return;
   document.getElementById('bizName').value=DB.settings.bizName||'';
   document.getElementById('bizTagline').value=DB.settings.bizTagline||'';
   document.getElementById('bizMobile').value=DB.settings.bizMobile||'';
@@ -513,12 +512,19 @@ function openSettings(){
   document.getElementById('setAppUser').value=DB.settings.appUser||'7700828989';
   document.getElementById('setAppPass').value=DB.settings.appPass||'Ajay@1522#';
   
-  // Firebase
-  document.getElementById('fbApiKey').value=DB.settings.fbApiKey||'';
-  document.getElementById('fbDbUrl').value=DB.settings.fbDbUrl||'';
-  document.getElementById('fbProjectId').value=DB.settings.fbProjectId||'';
+  // Firebase (Locked by default)
+  const fbs = ['fbApiKey', 'fbDbUrl', 'fbProjectId'];
+  fbs.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      el.value = DB.settings[id] || '';
+      el.type = 'password';
+      el.setAttribute('readonly', 'true');
+    }
+  });
+  if(document.getElementById('unlockFbBtn')) document.getElementById('unlockFbBtn').style.display = 'block';
 
-  renderTrash(); 
+  renderTrash();
   document.getElementById('settingsModal').style.display='flex';
 }
 function closeSettings(e){if(e.target.id==='settingsModal')document.getElementById('settingsModal').style.display='none';}
@@ -542,6 +548,21 @@ function saveSettings(){
   if(typeof initFirebase === 'function') initFirebase();
   document.getElementById('settingsModal').style.display='none';
   showToast('सेटिंग सेव हो गई और Firebase कनेक्ट हो रहा है ✅');
+  renderDashboard();
+}
+
+function unlockFirebaseSettings() {
+  if (!checkPin()) return;
+  const fbs = ['fbApiKey', 'fbDbUrl', 'fbProjectId'];
+  fbs.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      el.type = 'text';
+      el.removeAttribute('readonly');
+    }
+  });
+  if(document.getElementById('unlockFbBtn')) document.getElementById('unlockFbBtn').style.display = 'none';
+  showToast('Firebase सेटिंग्स अनलॉक हो गईं 🔓');
 }
 
 // ===== FIREBASE SYNC (Handled in app.js real-time) =====
