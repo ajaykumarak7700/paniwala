@@ -430,6 +430,32 @@
   </div>
 </div>
 
+<!-- Final Settlement Modal -->
+<div id="settlementModal" class="modal-overlay" style="display:none" onclick="if(event.target.id==='settlementModal') this.style.display='none'">
+  <div class="modal-box">
+    <div class="modal-title">✅ हिसाब पूरा करें</div>
+    <div style="font-size:13px;color:#555;margin-bottom:12px" id="settlementInfo"></div>
+    <input type="hidden" id="settlementId"/>
+    
+    <label style="display:flex;align-items:center;gap:10px;padding:12px;background:#E8F5E9;border-radius:10px;margin-bottom:10px;cursor:pointer">
+      <input type="checkbox" id="settlementItems" style="width:18px;height:18px"/>
+      <span style="font-size:14px;font-weight:600;color:#2E7D32">हाँ, सभी जार और बोतलें वापस आ गईं</span>
+    </label>
+    
+    <div id="settlementMoneyDiv" style="display:none">
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;background:#FFF3E0;border-radius:10px;margin-bottom:10px;cursor:pointer">
+        <input type="checkbox" id="settlementMoney" style="width:18px;height:18px"/>
+        <span style="font-size:14px;font-weight:600;color:#E65100">हाँ, बकाया राशि (<span id="settlementRemainAmt"></span>) प्राप्त हो गई</span>
+      </label>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-primary" onclick="saveSettlement()">💾 सेव करें</button>
+      <button class="btn-secondary" onclick="document.getElementById('settlementModal').style.display='none'">रद्द करें</button>
+    </div>
+  </div>
+</div>
+
 <!-- Payment Update Modal -->
 <div id="payModal" class="modal-overlay" style="display:none" onclick="closePayModal(event)">
   <div class="modal-box">

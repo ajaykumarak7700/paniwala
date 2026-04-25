@@ -20,7 +20,7 @@ function bookingCardHTML(b){
       <span>✅ ₹${b.paid}</span><span style="color:var(--red)">⏳ ₹${b.remain}</span>
     </div>
     <div class="card-actions">
-      ${!b.isConfirmed ? `<button class="action-btn" onclick="confirmBooking('${b.id}')" style="background:var(--blue);color:#fff;flex:2">✅ गाड़ी कन्फर्म</button>` : (((b.jars - (b.jarsReturned||0) > 0) || (b.bottles - (b.bottlesReturned||0) > 0)) ? `<button class="action-btn" onclick="returnAllItems('${b.id}')" style="background:var(--orange);color:#fff;flex:2">📦 सब वापस</button>` : `<span class="action-btn" style="background:#E8F5E9;color:#2E7D32;flex:2;cursor:default">✅ सब वापस</span>`)}
+      ${!b.isConfirmed ? `<button class="action-btn" onclick="confirmBooking('${b.id}')" style="background:var(--blue);color:#fff;flex:2">✅ गाड़ी कन्फर्म</button>` : (((b.jars - (b.jarsReturned||0) > 0) || (b.bottles - (b.bottlesReturned||0) > 0) || b.remain > 0) ? `<button class="action-btn" onclick="openSettlementModal('${b.id}')" style="background:var(--orange);color:#fff;flex:2">📦 हिसाब पूरा करें</button>` : `<span class="action-btn" style="background:#E8F5E9;color:#2E7D32;flex:2;cursor:default">✅ फ़ाइनल क्लोज्ड</span>`)}
       <button class="action-btn btn-pdf" onclick="generatePDF('${b.id}')">📄 PDF</button>
       <button class="action-btn btn-wa" onclick="shareWhatsApp('${b.id}')">💬 WA</button>
       <button class="action-btn btn-pay" onclick="openPayModal('${b.id}')">💰 भुगतान</button>
@@ -503,20 +503,79 @@ function confirmBooking(id){
   if(currentPage==='jars') renderJars();
 }
 
-function returnAllItems(id){
+function openSettlementModal(id){
+  const b=DB.bookings.find(x=>x.id===id);
+  if(!b) return;
+  document.getElementById('settlementId').value=id;
+  
+  const pJars = b.jars - (b.jarsReturned||0);
+  const pBots = b.bottles - (b.bottlesReturned||0);
+  let info = `👤 <b style="font-size:15px;color:#1565C0">${b.name}</b><br><br>`;
+  
+  const itemsPending = pJars > 0 || pBots > 0;
+  const moneyPending = b.remain > 0;
+  
+  if(itemsPending) {
+    info += `⚠️ <b>बाकी सामान:</b> ${pJars} जार, ${pBots} बोतल<br>`;
+    document.getElementById('settlementItems').checked = false;
+    document.getElementById('settlementItems').parentElement.style.display = 'flex';
+  } else {
+    info += `✅ <b>सभी सामान:</b> वापस आ चुके हैं<br>`;
+    document.getElementById('settlementItems').checked = true;
+    document.getElementById('settlementItems').parentElement.style.display = 'none';
+  }
+  
+  if(moneyPending) {
+    info += `💰 <b>बकाया राशि:</b> ₹${b.remain}`;
+    document.getElementById('settlementRemainAmt').textContent = '₹' + b.remain;
+    document.getElementById('settlementMoney').checked = false;
+    document.getElementById('settlementMoneyDiv').style.display = 'block';
+  } else {
+    info += `✅ <b>बकाया राशि:</b> कोई बकाया नहीं है`;
+    document.getElementById('settlementMoney').checked = true;
+    document.getElementById('settlementMoneyDiv').style.display = 'none';
+  }
+  
+  document.getElementById('settlementInfo').innerHTML = info;
+  document.getElementById('settlementModal').style.display='flex';
+}
+
+function saveSettlement(){
+  if(!checkPin()) return;
+  const id=document.getElementById('settlementId').value;
   const idx=DB.bookings.findIndex(b=>b.id===id);
   if(idx<0) return;
-  const b = DB.bookings[idx];
-  if(b.jarsReturned >= b.jars && b.bottlesReturned >= b.bottles) return;
-  if(!confirm('क्या सभी जार और बोतलें वापस आ गई हैं?')) return;
   
-  DB.bookings[idx].jarsReturned = b.jars || 0;
-  DB.bookings[idx].bottlesReturned = b.bottles || 0;
+  const b = DB.bookings[idx];
+  let updated = false;
+  
+  if(document.getElementById('settlementItems').parentElement.style.display !== 'none' && document.getElementById('settlementItems').checked) {
+    DB.bookings[idx].jarsReturned = b.jars || 0;
+    DB.bookings[idx].bottlesReturned = b.bottles || 0;
+    updated = true;
+  }
+  
+  if(document.getElementById('settlementMoneyDiv').style.display !== 'none' && document.getElementById('settlementMoney').checked) {
+    const amt = b.remain;
+    if(!DB.bookings[idx].payments) DB.bookings[idx].payments=[];
+    DB.bookings[idx].payments.push({id:uid(), date:today(), amount:amt, note:'फ़ाइनल हिसाब (Settlement)'});
+    DB.bookings[idx].paid += amt;
+    DB.bookings[idx].remain = 0;
+    updated = true;
+  }
+  
+  if(!updated) {
+    showToast('कोई विकल्प नहीं चुना गया');
+    return;
+  }
+  
   save();
-  showToast('सभी सामान अंदर जुड़ गए ✅');
+  document.getElementById('settlementModal').style.display='none';
+  showToast('हिसाब सफलता पूर्वक सेव हो गया ✅');
   renderDashboard();
   renderBookingList();
   if(typeof renderJars === 'function') renderJars();
+  if(typeof renderPayments === 'function') renderPayments();
 }
 
 // ===== SETTINGS =====
