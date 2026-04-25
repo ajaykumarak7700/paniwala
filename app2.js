@@ -505,6 +505,7 @@ function confirmBooking(id){
 
 // ===== SETTINGS =====
 function openSettings(){
+  if (!checkPin()) return;
   document.getElementById('bizName').value=DB.settings.bizName||'';
   document.getElementById('bizTagline').value=DB.settings.bizTagline||'';
   document.getElementById('bizMobile').value=DB.settings.bizMobile||'';
