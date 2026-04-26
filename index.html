@@ -167,12 +167,12 @@
   <!-- BOOKING PAGE -->
   <div id="page-booking" class="page">
     <div class="page-tabs">
-      <button class="tab-btn active" onclick="switchTab('form','booking')">नई बुकिंग</button>
-      <button class="tab-btn" onclick="switchTab('list','booking')">सभी बुकिंग</button>
+      <button class="tab-btn active" onclick="switchTab('list','booking')">सभी बुकिंग</button>
+      <button class="tab-btn" onclick="switchTab('form','booking')">नई बुकिंग</button>
     </div>
 
     <!-- Booking Form -->
-    <div id="tab-form" class="tab-content active">
+    <div id="tab-form" class="tab-content">
       <div class="form-card">
         <div class="form-title">📝 बुकिंग फॉर्म</div>
         <input type="hidden" id="editId"/>
@@ -251,7 +251,7 @@
     </div>
 
     <!-- Booking List -->
-    <div id="tab-list" class="tab-content">
+    <div id="tab-list" class="tab-content active">
       <div style="display:flex;gap:10px;margin-bottom:12px">
         <button class="btn-primary" onclick="exportToExcel()" style="background:linear-gradient(135deg,#2E7D32,#1B5E20);padding:10px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px">
           📊 Excel में बैकअप लें (Export All)

@@ -131,7 +131,7 @@ function showPage(page) {
   document.getElementById('nav-' + page).classList.add('active');
   currentPage = page;
   if (page === 'dashboard') renderDashboard();
-  if (page === 'booking') { renderBookingList(); switchTab('form','booking'); }
+  if (page === 'booking') { renderBookingList(); switchTab('list','booking'); }
   if (page === 'jars') renderJars();
   if (page === 'payments') { switchTab('all','payments'); renderPayments(); }
   if (page === 'reports') {
