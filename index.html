@@ -36,7 +36,7 @@
 <!-- Login Page -->
 <div id="loginPage" class="login-overlay" style="display:none">
   <div class="login-card">
-    <div class="login-logo">🔐</div>
+    <img src="logo.png" style="width:100px;height:100px;border-radius:50%;margin-bottom:15px;box-shadow:0 4px 10px rgba(0,0,0,0.1);background:#fff;padding:5px">
     <h2>लॉगिन करें</h2>
     <p>आशा एंटरप्राइजेस - सुरक्षित लॉगिन</p>
     
@@ -55,7 +55,7 @@
 
 <!-- Top Header -->
 <header class="app-header">
-  <div class="logo-circle">💧</div>
+  <img src="logo.png" style="width:54px;height:54px;border-radius:50%;object-fit:cover;background:#fff;border:2px solid rgba(255,255,255,0.4);padding:2px" alt="Logo">
   <div class="header-center">
     <div class="header-title">आशा एंटरप्राइजेस</div>
     <div class="header-sub" id="headerDate"></div>
@@ -605,11 +605,16 @@
 <div id="slipTemplate" style="display:none;position:fixed;left:-9999px;top:0">
   <div id="slipContent" style="width:520px;background:#fff;font-family:'Noto Sans Devanagari',sans-serif;border:2px solid #1565C0;border-radius:8px;overflow:hidden">
     <!-- Header -->
-    <div style="background:#fff;color:#1565C0;text-align:center;padding:16px 12px;border-bottom:2px solid #1565C0">
-      <div id="slipBizName" style="font-size:24px;font-weight:800;letter-spacing:0.5px">आशा एंटरप्राइजेस</div>
-      <div id="slipBizTagline" style="font-size:14px;margin-top:2px;font-weight:600;color:#555">शुद्ध जल</div>
-      <div id="slipBizContact" style="font-size:12px;margin-top:4px;font-weight:700;color:#333"></div>
-      <div style="font-size:11px;margin-top:6px;border:1px solid #1565C0;color:#1565C0;border-radius:20px;padding:2px 14px;display:inline-block;font-weight:700">बुकिंग पर्ची (Booking Slip)</div>
+    <div style="background:#fff;color:#1565C0;text-align:center;padding:16px 12px;border-bottom:2px solid #1565C0;display:flex;align-items:center;justify-content:center;gap:15px">
+      <img src="logo.png" style="width:70px;height:70px;border-radius:50%;object-fit:cover;background:#fff;border:1px solid #ddd">
+      <div style="text-align:left">
+        <div id="slipBizName" style="font-size:24px;font-weight:800;letter-spacing:0.5px">आशा एंटरप्राइजेस</div>
+        <div id="slipBizTagline" style="font-size:14px;margin-top:2px;font-weight:600;color:#555">शुद्ध जल</div>
+        <div id="slipBizContact" style="font-size:12px;margin-top:4px;font-weight:700;color:#333"></div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:5px 0;background:#f0f7ff;border-bottom:1px solid #1565C0">
+      <div style="font-size:11px;color:#1565C0;font-weight:700;text-transform:uppercase">बुकिंग पर्ची (Booking Slip)</div>
     </div>
     <!-- Slip Meta -->
     <div style="display:flex;justify-content:space-between;padding:10px 16px;background:#E3F2FD;font-size:12px;font-weight:600">
