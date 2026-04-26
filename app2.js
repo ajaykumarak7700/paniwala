@@ -585,6 +585,7 @@ function openSettings(){
   document.getElementById('bizTagline').value=DB.settings.bizTagline||'';
   document.getElementById('bizMobile').value=DB.settings.bizMobile||'';
   document.getElementById('bizAddress').value=DB.settings.bizAddress||'';
+  document.getElementById('driverMobile').value=DB.settings.driverMobile||'';
   document.getElementById('setAppUser').value=DB.settings.appUser||'7700828989';
   document.getElementById('setAppPass').value=DB.settings.appPass||'Ajay@1522#';
   
@@ -610,6 +611,7 @@ function saveSettings(){
   DB.settings.bizTagline=document.getElementById('bizTagline').value.trim()||'शुद्ध जल';
   DB.settings.bizMobile=document.getElementById('bizMobile').value.trim();
   DB.settings.bizAddress=document.getElementById('bizAddress').value.trim();
+  DB.settings.driverMobile=document.getElementById('driverMobile').value.trim();
   
   const newUser = document.getElementById('setAppUser').value.trim();
   const newPass = document.getElementById('setAppPass').value.trim();
@@ -645,9 +647,10 @@ function unlockFirebaseSettings() {
 // ===== FIREBASE SYNC (Handled in app.js real-time) =====
 
 // ===== WHATSAPP =====
-function shareWhatsApp(id){
-  const b=DB.bookings.find(x=>x.id===id);if(!b)return;
-  const msg = `*${DB.settings.bizName||'आशा एंटरप्राइजेस'}*\n` +
+let _waCurrentBookingId = null; // tracks which booking WA share modal is open for
+
+function buildWAMsg(b){
+  return `*${DB.settings.bizName||'आशा एंटरप्राइजेस'}*\n` +
     `_${DB.settings.bizTagline||'शुद्ध जल'}_\n\n` +
     `🧾 *पर्ची नं:* ${b.slipNo}\n` +
     `👤 *ग्राहक का नाम:* ${b.name}\n` +
@@ -665,8 +668,75 @@ function shareWhatsApp(id){
     `⏳ बकाया (Remain): ₹${b.remain}\n\n` +
     (b.notes ? `📝 *नोट:* ${b.notes}\n\n` : ``) +
     `📞 *संपर्क:* ${DB.settings.bizMobile || ''}`;
-  window.open('https://wa.me/?text='+encodeURIComponent(msg));
 }
+
+function shareWhatsApp(id){
+  const b = DB.bookings.find(x => x.id === id);
+  if(!b) return;
+  _waCurrentBookingId = id;
+
+  // Fill labels in modal
+  const custLabel = document.getElementById('waCustomerNumLabel');
+  if(custLabel) custLabel.textContent = `📱 ${b.mobile}`;
+
+  const driverNum = DB.settings.driverMobile || '';
+  const driverLabel = document.getElementById('waDriverNumLabel');
+  if(driverLabel){
+    driverLabel.textContent = driverNum
+      ? `📱 ${driverNum}`
+      : '⚠️ Settings में नंबर जोड़ें';
+  }
+
+  // Style driver button based on number availability
+  const driverBtn = document.getElementById('waOptDriver');
+  if(driverBtn){
+    driverBtn.style.opacity = driverNum ? '1' : '0.6';
+  }
+
+  document.getElementById('waShareModal').style.display = 'flex';
+}
+
+function closeWAShareModal(){
+  document.getElementById('waShareModal').style.display = 'none';
+}
+
+function _openWA(phone, msg){
+  const p = phone.replace(/\D/g,'');
+  const dial = p.length === 10 ? '91' + p : p;
+  window.open('https://wa.me/' + dial + '?text=' + encodeURIComponent(msg), '_blank');
+  closeWAShareModal();
+}
+
+// 1. Customer
+function waShareCustomer(){
+  const b = DB.bookings.find(x => x.id === _waCurrentBookingId);
+  if(!b){ showToast('बुकिंग नहीं मिली'); return; }
+  _openWA(b.mobile, buildWAMsg(b));
+}
+
+// 2. Driver
+function waShareDriver(){
+  const b = DB.bookings.find(x => x.id === _waCurrentBookingId);
+  if(!b){ showToast('बुकिंग नहीं मिली'); return; }
+  const driverNum = DB.settings.driverMobile || '';
+  if(!driverNum){
+    // No driver number — open settings
+    closeWAShareModal();
+    showToast('⚙️ पहले Settings में ड्राइवर का नंबर जोड़ें');
+    setTimeout(() => openSettings(), 400);
+    return;
+  }
+  _openWA(driverNum, buildWAMsg(b));
+}
+
+// 3. Other — WhatsApp contact picker (no number pre-filled)
+function waShareOther(){
+  const b = DB.bookings.find(x => x.id === _waCurrentBookingId);
+  if(!b){ showToast('बुकिंग नहीं मिली'); return; }
+  window.open('https://wa.me/?text=' + encodeURIComponent(buildWAMsg(b)), '_blank');
+  closeWAShareModal();
+}
+
 
 // ===== EXPORT/IMPORT =====
 function exportExcel(type = 'full'){
