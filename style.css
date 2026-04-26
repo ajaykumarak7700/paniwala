@@ -156,8 +156,8 @@ body{font-family:'Noto Sans Devanagari',sans-serif;background:var(--bg);color:va
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
 
-/* Calendar Banner - Tiranga Animated Border */
-.calendar-banner{background:transparent;border-radius:var(--radius);padding:14px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.15);border:6px solid transparent;display:flex;flex-direction:column}
+/* Calendar Banner - Extra Thick Tiranga Border */
+.calendar-banner{background:transparent;border-radius:var(--radius);padding:14px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.2);border:12px solid transparent;display:flex;flex-direction:column}
 .calendar-banner::before {
   content: '';
   position: absolute;
@@ -165,7 +165,7 @@ body{font-family:'Noto Sans Devanagari',sans-serif;background:var(--bg);color:va
   left: -50%;
   width: 200%;
   height: 200%;
-  background: conic-gradient(transparent, #FF9933, #FFFFFF, #138808, transparent 30%);
+  background: conic-gradient(transparent, #FF9933, #FFFFFF, #138808, transparent 40%);
   animation: rotateBorder 3s linear infinite;
   z-index: 0;
 }
@@ -174,9 +174,9 @@ body{font-family:'Noto Sans Devanagari',sans-serif;background:var(--bg);color:va
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg,#f8faff,#eef2ff,#f8faff);
-  border-radius: calc(var(--radius) - 6px);
+  border-radius: calc(var(--radius) - 12px);
   z-index: 1;
-  margin: 2px; /* Inner margin to show the moving border */
+  margin: 4px; /* Space to show the extra thick border */
 }
 @keyframes rotateBorder {
   0% { transform: rotate(0deg); }
