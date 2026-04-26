@@ -94,10 +94,10 @@ function renderDashboard(){
   const tmr=new Date();tmr.setDate(tmr.getDate()+1);
   const tStr=tmr.toISOString().slice(0,10);
   DB.bookings.forEach(b=>{
-    if(b.eventDate===tStr) reminders.push({type:'event', text:`🎉 कल कार्यक्रम: ${b.name}`, mobile:b.mobile});
-    if(b.remain>0) reminders.push({type:'pay', text:`💰 ₹${b.remain} बकाया: ${b.name}`, mobile:b.mobile});
+    if(b.eventDate===tStr) reminders.push({type:'event', text:`🎉 कल कार्यक्रम: ${b.name}`, booking:b});
+    if(b.remain>0) reminders.push({type:'pay', text:`💰 ₹${b.remain} बकाया: ${b.name}`, booking:b});
     if(((b.jars-(b.jarsReturned||0))>0 || (b.bottles-(b.bottlesReturned||0))>0) && b.eventDate<t) {
-      reminders.push({type:'item', text:`⚠️ सामान बाकी: ${b.name}`, mobile:b.mobile});
+      reminders.push({type:'item', text:`⚠️ सामान बाकी: ${b.name}`, booking:b});
     }
   });
 
@@ -106,17 +106,21 @@ function renderDashboard(){
   if(rbox && rlist) {
     if(reminders.length){
       rbox.style.display='block';
-      rlist.innerHTML=reminders.slice(0,8).map(r=>`
+      rlist.innerHTML=reminders.slice(0,8).map(r=>{
+        const b = r.booking;
+        const msg = encodeURIComponent(buildWAMsg(b));
+        return `
         <div class="reminder-item" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#fff;border-radius:10px;margin-bottom:8px;box-shadow:0 2px 5px rgba(0,0,0,0.05)">
           <div style="flex:1">
             <div style="font-weight:700;font-size:13px">${r.text}</div>
-            <div style="font-size:11px;color:#666;margin-top:2px">📱 ${r.mobile}</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">📱 ${b.mobile}</div>
           </div>
           <div style="display:flex;gap:12px">
-            <a href="tel:${r.mobile}" style="text-decoration:none;background:#E3F2FD;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:18px">📞</a>
-            <a href="https://wa.me/91${r.mobile}" target="_blank" style="text-decoration:none;background:#E8F5E9;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:18px">💬</a>
+            <a href="tel:${b.mobile}" style="text-decoration:none;background:#E3F2FD;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:18px">📞</a>
+            <a href="https://wa.me/91${b.mobile}?text=${msg}" target="_blank" style="text-decoration:none;background:#E8F5E9;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:18px">💬</a>
           </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     }else rbox.style.display='none';
   }
 
