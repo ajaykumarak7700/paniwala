@@ -656,6 +656,55 @@ function unlockFirebaseSettings() {
   showToast('Firebase सेटिंग्स अनलॉक हो गईं 🔓');
 }
 
+function exportToExcel() {
+  if (DB.bookings.length === 0) {
+    showToast('निर्यात करने के लिए कोई बुकिंग नहीं है');
+    return;
+  }
+
+  const headers = [
+    'Slip No', 'Customer Name', 'Mobile', 'Address', 'Event Type', 'Event Date', 
+    'Booking Date', 'Jars', 'Returned Jars', 'Bottles', 'Returned Bottles', 
+    'Total Amount', 'Paid', 'Remaining', 'Confirmed Status', 'Notes'
+  ];
+
+  const rows = DB.bookings.map(b => [
+    b.slipNo,
+    b.name,
+    b.mobile,
+    (b.address || '').replace(/,/g, ' '),
+    b.eventType,
+    b.eventDate,
+    b.bookingDate,
+    b.jars,
+    b.jarsReturned || 0,
+    b.bottles || 0,
+    b.bottlesReturned || 0,
+    b.total,
+    b.paid,
+    b.remain,
+    b.isConfirmed ? 'Confirmed' : 'Pending',
+    (b.notes || '').replace(/,/g, ' ')
+  ]);
+
+  let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Added BOM for Excel UTF-8 support
+  csvContent += headers.join(",") + "\r\n";
+  
+  rows.forEach(row => {
+    csvContent += row.join(",") + "\r\n";
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `Jalwala_Backup_${new Date().toLocaleDateString()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showToast('Excel बैकअप डाउनलोड हो गया ✅');
+}
+
 // ===== FIREBASE SYNC (Handled in app.js real-time) =====
 
 // ===== WHATSAPP =====

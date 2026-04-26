@@ -260,6 +260,11 @@
 
     <!-- Booking List -->
     <div id="tab-list" class="tab-content">
+      <div style="display:flex;gap:10px;margin-bottom:12px">
+        <button class="btn-primary" onclick="exportToExcel()" style="background:linear-gradient(135deg,#2E7D32,#1B5E20);padding:10px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px">
+          📊 Excel में बैकअप लें (Export All)
+        </button>
+      </div>
       <div class="search-bar">
         <input type="text" id="searchBooking" placeholder="🔍 नाम या नंबर से खोजें..." oninput="renderBookingList()"/>
       </div>
