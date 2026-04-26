@@ -259,13 +259,31 @@ function changeCalMonth(dir) {
 }
 
 let touchStartX = 0;
-function handleTouchStart(e) { touchStartX = e.changedTouches[0].screenX; }
+function handleTouchStart(e) { 
+  touchStartX = e.changedTouches[0].screenX; 
+  const banner = document.querySelector('.calendar-banner');
+  if(banner) banner.style.transition = 'none';
+}
+function handleTouchMove(e) {
+  const touchCurrentX = e.changedTouches[0].screenX;
+  const diff = touchCurrentX - touchStartX;
+  const banner = document.querySelector('.calendar-banner');
+  if(banner && Math.abs(diff) < 200) { // Limit drag distance
+    banner.style.transform = `translateX(${diff}px)`;
+  }
+}
 function handleTouchEnd(e) {
   const touchEndX = e.changedTouches[0].screenX;
   const diff = touchEndX - touchStartX;
-  if (Math.abs(diff) > 50) { // Swipe threshold
-    if (diff > 0) changeCalMonth(-1); // Swipe Right -> Previous Month
-    else changeCalMonth(1); // Swipe Left -> Next Month
+  const banner = document.querySelector('.calendar-banner');
+  if(!banner) return;
+  
+  banner.style.transition = 'transform 0.3s ease-out';
+  banner.style.transform = 'translateX(0)';
+  
+  if (Math.abs(diff) > 80) { // Threshold for month change
+    if (diff > 0) changeCalMonth(-1);
+    else changeCalMonth(1);
   }
 }
 
