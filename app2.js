@@ -258,6 +258,17 @@ function changeCalMonth(dir) {
   renderCalendar();
 }
 
+let touchStartX = 0;
+function handleTouchStart(e) { touchStartX = e.changedTouches[0].screenX; }
+function handleTouchEnd(e) {
+  const touchEndX = e.changedTouches[0].screenX;
+  const diff = touchEndX - touchStartX;
+  if (Math.abs(diff) > 50) { // Swipe threshold
+    if (diff > 0) changeCalMonth(-1); // Swipe Right -> Previous Month
+    else changeCalMonth(1); // Swipe Left -> Next Month
+  }
+}
+
 function openCalDate(dStr) {
   if (dStr < today()) {
     const bks = DB.bookings.filter(b => b.eventDate === dStr);

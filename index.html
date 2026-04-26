@@ -89,7 +89,7 @@
   <div id="page-dashboard" class="page active">
     
     <!-- Calendar Banner -->
-    <div class="calendar-banner">
+    <div class="calendar-banner" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event)">
       <div class="cal-header">
         <button onclick="changeCalMonth(-1)">◀</button>
         <div class="cal-title" id="calMonthYear">कैलेंडर</div>
