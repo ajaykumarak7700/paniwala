@@ -36,6 +36,13 @@ function emptyHTML(icon,msg){return`<div class="empty-state"><div class="empty-i
 function renderBookingList(){
   const q=(document.getElementById('searchBooking')?.value||'').toLowerCase();
   let list=[...DB.bookings];
+  
+  // Sort by eventDate Ascending (Earliest upcoming dates first)
+  list.sort((a,b) => {
+    if(a.eventDate !== b.eventDate) return a.eventDate.localeCompare(b.eventDate);
+    return a.slipNo.localeCompare(b.slipNo);
+  });
+
   if(q) {
     list=list.filter(b=>b.name.toLowerCase().includes(q)||b.mobile.includes(q)||b.eventDate.includes(q)||b.slipNo.toLowerCase().includes(q));
   }
