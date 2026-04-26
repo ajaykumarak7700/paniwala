@@ -13,7 +13,7 @@
 body{font-family:'Noto Sans Devanagari',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
 
 /* Header */
-.app-header{position:fixed;top:0;left:0;right:0;z-index:100;background:linear-gradient(135deg,#1a1a2e,#000000);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;height:80px;box-shadow:0 2px 12px rgba(0,0,0,.2);border-bottom:4px solid #000080}
+.app-header{position:fixed;top:0;left:0;right:0;z-index:100;background:linear-gradient(270deg,#0D47A1,#1976D2,#42A5F5,#0D47A1);background-size:400% 400%;animation:flowWater 8s ease infinite;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;height:80px;box-shadow:0 4px 15px rgba(0,0,0,0.2);border-bottom:2px solid rgba(255,255,255,0.3)}
 .header-center{flex:1;text-align:center;padding:0 5px}
 .logo-circle{width:46px;height:46px;background:rgba(255,255,255,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
 .header-title{font-size:24px;font-weight:900;letter-spacing:1px;text-transform:uppercase;text-shadow:0 2px 4px rgba(0,0,0,0.2);line-height:1}
@@ -24,11 +24,17 @@ body{font-family:'Noto Sans Devanagari',sans-serif;background:var(--bg);color:va
 .settings-floating-btn:active{transform:scale(.85)}
 
 /* Bottom Nav */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:linear-gradient(135deg,#1a1a2e,#000000);border-top:3px solid #000080;display:flex;box-shadow:0 -4px 15px rgba(0,0,0,0.3)}
-.nav-btn{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 2px;font-family:'Noto Sans Devanagari',sans-serif;font-size:12px;font-weight:600;color:rgba(255,255,255,0.7);cursor:pointer;gap:4px;transition:.2s}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:linear-gradient(270deg,#0D47A1,#1976D2,#42A5F5,#0D47A1);background-size:400% 400%;animation:flowWater 8s ease infinite;border-top:2px solid rgba(255,255,255,0.3);display:flex;box-shadow:0 -4px 15px rgba(0,0,0,.2)}
+.nav-btn{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 2px;font-family:'Noto Sans Devanagari',sans-serif;font-size:12px;font-weight:600;color:rgba(255,255,255,0.8);cursor:pointer;gap:4px;transition:.2s}
 .nav-btn span:first-child{font-size:24px;filter:grayscale(1) brightness(3) opacity(0.8);transition:.2s}
-.nav-btn.active{color:#ffffff;font-weight:900;background:rgba(255,255,255,0.1)}
+.nav-btn.active{color:#ffffff;font-weight:900;background:rgba(255,255,255,0.15)}
 .nav-btn.active span:first-child{transform:translateY(-3px);filter:grayscale(0) brightness(1.5) opacity(1)}
+
+@keyframes flowWater {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
 /* Main */
 .main-content{margin-top:80px;margin-bottom:80px;padding:12px}
