@@ -768,8 +768,9 @@ function buildWAMsg(b){
     `💵 *भुगतान विवरण:*\n` +
     `💰 कुल राशि: ₹${b.total}\n` +
     `✅ प्राप्त (Advance): ₹${b.paid}\n` +
-    `⏳ बकाया (Remain): ₹${b.remain}\n\n` +
+    `⏳ *बकाया (Remain):* ₹${b.remain}\n\n` +
     (b.notes ? `📝 *नोट:* ${b.notes}\n\n` : ``) +
+    `🙏 *कृपया अपना बकाया राशि का भुगतान जल्द से जल्द सुनिश्चित करें। धन्यवाद!* \n\n` +
     `📞 *संपर्क:* ${DB.settings.bizMobile || ''}`;
 }
 
