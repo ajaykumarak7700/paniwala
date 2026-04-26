@@ -410,6 +410,30 @@ function renderCustomerReport(){
     </div>`).join(''):emptyHTML('👤','कोई ग्राहक नहीं');
 }
 
+function renderRangeReport(){
+  const from = document.getElementById('rangeFrom')?.value;
+  const to = document.getElementById('rangeTo')?.value;
+  const el = document.getElementById('rangeReport');
+  if(!el) return;
+  if(!from || !to) { el.innerHTML = emptyHTML('📅', 'कृपया शुरुआत और अंत की तारीख चुनें'); return; }
+  
+  const list = DB.bookings.filter(b => b.bookingDate >= from && b.bookingDate <= to);
+  if(!list.length){ el.innerHTML = emptyHTML('📊', 'इस अवधि में कोई बुकिंग नहीं मिली'); return; }
+  
+  const total = list.reduce((s,b)=>s+b.total,0);
+  const paid = list.reduce((s,b)=>s+b.paid,0);
+  
+  el.innerHTML = `<div class="report-card">
+    <div class="modal-title" style="font-size:15px;color:var(--blue);margin-bottom:12px;border-bottom:2px solid var(--blue-light);padding-bottom:8px">📊 ${fmtDate(from)} से ${fmtDate(to)} तक की रिपोर्ट</div>
+    <div class="report-row"><span>📋 कुल बुकिंग</span><span>${list.length}</span></div>
+    <div class="report-row"><span>💰 कुल राशि</span><span>₹${total}</span></div>
+    <div class="report-row"><span>✅ प्राप्त राशि</span><span style="color:var(--green)">₹${paid}</span></div>
+    <div class="report-row"><span>⏳ बकाया राशि</span><span style="color:var(--red)">₹${total-paid}</span></div>
+    <div class="report-row"><span>🫙 कुल जार</span><span>${list.reduce((s,b)=>s+b.jars,0)}</span></div>
+    <div class="report-row"><span>🍾 कुल बोतल</span><span>${list.reduce((s,b)=>s+(b.bottles||0),0)}</span></div>
+  </div>` + list.map(bookingCardHTML).join('');
+}
+
 // MODALS are handled at the top
 function openPayModal(id){document.getElementById('payBookingId').value=id;document.getElementById('payAmount').value='';document.getElementById('payModal').style.display='flex';}
 function closePayModal(e){if(e.target.id==='payModal')document.getElementById('payModal').style.display='none';}
@@ -818,6 +842,14 @@ function exportExcel(type = 'full'){
     income = (DB.extraIncome || []).filter(i => i.date?.startsWith(m));
     expense = (DB.extraExpense || []).filter(e => e.date?.startsWith(m));
     fileName = 'monthly_report_' + m;
+  } else if (type === 'range') {
+    const from = document.getElementById('rangeFrom')?.value;
+    const to = document.getElementById('rangeTo')?.value;
+    if (!from || !to) { showToast('कृपया तारीख चुनें'); return; }
+    bookings = DB.bookings.filter(b => b.bookingDate >= from && b.bookingDate <= to);
+    income = (DB.extraIncome || []).filter(i => i.date >= from && i.date <= to);
+    expense = (DB.extraExpense || []).filter(e => e.date >= from && e.date <= to);
+    fileName = `range_report_${from}_to_${to}`;
   } else {
     bookings = DB.bookings;
     income = DB.extraIncome || [];

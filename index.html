@@ -332,6 +332,7 @@
     <div class="page-tabs">
       <button class="tab-btn active" onclick="switchTab('daily','reports')">दैनिक</button>
       <button class="tab-btn" onclick="switchTab('monthly','reports')">मासिक</button>
+      <button class="tab-btn" onclick="switchTab('range','reports')">कस्टम रेंज</button>
       <button class="tab-btn" onclick="switchTab('customer','reports')">ग्राहक</button>
     </div>
     <div id="tab-daily" class="tab-content active">
@@ -356,6 +357,22 @@
       </div>
       <div id="monthlyReport"></div>
       <button class="btn-primary" onclick="exportExcel('monthly')" style="margin:16px;background:#2E7D32;width:calc(100% - 32px)">📊 इस महीने की रिपोर्ट (Excel)</button>
+    </div>
+    <div id="tab-range" class="tab-content">
+      <div class="form-card">
+        <div class="form-row">
+          <div class="form-group half">
+            <label>कब से (From)</label>
+            <input type="date" id="rangeFrom" oninput="renderRangeReport()"/>
+          </div>
+          <div class="form-group half">
+            <label>कब तक (To)</label>
+            <input type="date" id="rangeTo" oninput="renderRangeReport()"/>
+          </div>
+        </div>
+      </div>
+      <div id="rangeReport"></div>
+      <button class="btn-primary" onclick="exportExcel('range')" style="margin:16px;background:#2E7D32;width:calc(100% - 32px)">📊 रेंज रिपोर्ट डाउनलोड करें (Excel)</button>
     </div>
     <div id="tab-customer" class="tab-content">
       <div class="search-bar">
