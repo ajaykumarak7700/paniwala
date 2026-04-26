@@ -407,13 +407,27 @@ async function restoreBooking(id) {
   }
 }
 
-function permanentDelete(id) {
+async function permanentDelete(id) {
   if (!checkPin()) return;
-  if (!confirm('सावधान! यह हमेशा के लिए डिलीट हो जाएगा।?')) return;
+  if (!confirm('सावधान! यह हमेशा के लिए डिलीट हो जाएगा। क्या आप फिर भी आगे बढ़ना चाहते हैं?')) return;
+  
+  const b = DB.trash.find(x => x.id === id);
+  if (b && b.paid > 0) {
+    // Transfer earnings to Extra Income so they aren't lost
+    if (!DB.extraIncome) DB.extraIncome = [];
+    DB.extraIncome.push({
+      id: uid(),
+      date: today(),
+      amount: b.paid,
+      note: `डिलीटेड बुकिंग की कमाई: ${b.name} (${b.slipNo})`
+    });
+  }
+
   DB.trash = DB.trash.filter(b => b.id !== id);
-  save();
-  showToast('बुकिंग हमेशा के लिए डिलीट कर दी गई');
+  await save();
+  showToast('बुकिंग हमेशा के लिए डिलीट कर दी गई और कमाई सेव कर ली गई ✅');
   renderTrash();
+  renderDashboard();
 }
 
 // ===== AUTHENTICATION =====

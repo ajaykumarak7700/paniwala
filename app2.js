@@ -47,8 +47,11 @@ function renderBookingList(){
 function renderDashboard(){
   const t=today(),m=monthStr();
   const todayB=DB.bookings.filter(b=>b.bookingDate===t);
+  const trashTodayB=(DB.trash||[]).filter(b=>b.bookingDate===t); // also check trash
+  
   const upcoming=DB.bookings.filter(b=>b.eventDate>t).slice(0,5);
-  const todayE=todayB.reduce((s,b)=>s+b.paid,0);
+  
+  const todayE=todayB.reduce((s,b)=>s+b.paid,0) + trashTodayB.reduce((s,b)=>s+b.paid,0);
   const pending=DB.bookings.reduce((s,b)=>s+b.remain,0);
   
   const todayExtra = (DB.extraIncome||[]).filter(i=>i.date===t).reduce((s,i)=>s+i.amount,0);
@@ -58,7 +61,16 @@ function renderDashboard(){
   const monthExp = (DB.extraExpense||[]).filter(e=>e.date?.startsWith(m)).reduce((s,e)=>s+e.amount,0);
 
   let monthE = 0;
+  // Sum payments from active bookings
   DB.bookings.forEach(b => {
+    if (b.payments) {
+      b.payments.forEach(p => {
+        if (p.date && p.date.startsWith(m)) monthE += p.amount;
+      });
+    }
+  });
+  // Sum payments from trash bookings
+  (DB.trash||[]).forEach(b => {
     if (b.payments) {
       b.payments.forEach(p => {
         if (p.date && p.date.startsWith(m)) monthE += p.amount;
