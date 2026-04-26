@@ -22,17 +22,24 @@ function initFirebase() {
     // Listen for real-time changes
     firebaseDB.ref('jalwala_data').on('value', (snapshot) => {
       const data = snapshot.val();
-      if (data && data.bookings) { // Only sync if remote data is valid
-        isRemoteUpdate = true;
-        DB = data;
-        if (!DB.extraIncome) DB.extraIncome = [];
-        if (!DB.extraExpense) DB.extraExpense = [];
-        localStorage.setItem('jalwala_db', JSON.stringify(DB));
-        if (typeof renderDashboard === 'function') renderDashboard();
-        if (typeof checkAuth === 'function') checkAuth();
-        setTimeout(() => { isRemoteUpdate = false; }, 1000);
+      if (data && data.bookings) { 
+        // Only overwrite if remote data has a newer timestamp
+        const remoteTS = (data.settings && data.settings.lastModified) || 0;
+        const localTS = (DB.settings && DB.settings.lastModified) || 0;
+        const isLocalEmpty = !DB.bookings || DB.bookings.length === 0;
+        
+        if (remoteTS > localTS || isLocalEmpty) {
+          isRemoteUpdate = true;
+          DB = data;
+          if (!DB.extraIncome) DB.extraIncome = [];
+          if (!DB.extraExpense) DB.extraExpense = [];
+          localStorage.setItem('jalwala_db', JSON.stringify(DB));
+          if (typeof renderDashboard === 'function') renderDashboard();
+          if (typeof renderBookingList === 'function') renderBookingList();
+          if (typeof checkAuth === 'function') checkAuth();
+          setTimeout(() => { isRemoteUpdate = false; }, 1000);
+        }
       } else if (!data && DB.bookings.length > 0) {
-        // If Firebase is empty but we have local data, push local to Firebase
         console.log("Firebase empty, pushing local data...");
         firebaseDB.ref('jalwala_data').set(DB);
       }
@@ -50,6 +57,8 @@ function save() {
   if (!DB.extraExpense) DB.extraExpense = [];
   if (!DB.trash) DB.trash = [];
   if (!DB.settings) DB.settings = {};
+  
+  DB.settings.lastModified = Date.now(); // Add timestamp for sync check
 
   localStorage.setItem('jalwala_db', JSON.stringify(DB)); 
   
@@ -100,7 +109,6 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
 function slipNo() {
   const n = String(DB.settings.slipCounter || 1).padStart(3,'0');
   DB.settings.slipCounter = (DB.settings.slipCounter || 1) + 1;
-  save();
   return 'BS-' + n;
 }
 
