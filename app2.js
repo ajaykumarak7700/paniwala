@@ -47,7 +47,7 @@ function renderBookingList(){
 function renderDashboard(){
   const t=today(),m=monthStr();
   const todayB=DB.bookings.filter(b=>b.bookingDate===t);
-  const trashTodayB=(DB.trash||[]).filter(b=>b.bookingDate===t); // also check trash
+  const trashTodayB=(DB.trash||[]).filter(b=>b.bookingDate===t && b.isConfirmed); // only confirmed trash
   
   const upcoming=DB.bookings.filter(b=>b.eventDate>t).slice(0,5);
   
@@ -69,9 +69,9 @@ function renderDashboard(){
       });
     }
   });
-  // Sum payments from trash bookings
+  // Sum payments from trash bookings (only if confirmed)
   (DB.trash||[]).forEach(b => {
-    if (b.payments) {
+    if (b.isConfirmed && b.payments) {
       b.payments.forEach(p => {
         if (p.date && p.date.startsWith(m)) monthE += p.amount;
       });

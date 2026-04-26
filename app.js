@@ -412,7 +412,7 @@ async function permanentDelete(id) {
   if (!confirm('सावधान! यह हमेशा के लिए डिलीट हो जाएगा। क्या आप फिर भी आगे बढ़ना चाहते हैं?')) return;
   
   const b = DB.trash.find(x => x.id === id);
-  if (b && b.paid > 0) {
+  if (b && b.paid > 0 && b.isConfirmed) { // Only if confirmed
     // Transfer earnings to Extra Income so they aren't lost
     if (!DB.extraIncome) DB.extraIncome = [];
     DB.extraIncome.push({
@@ -425,7 +425,7 @@ async function permanentDelete(id) {
 
   DB.trash = DB.trash.filter(b => b.id !== id);
   await save();
-  showToast('बुकिंग हमेशा के लिए डिलीट कर दी गई और कमाई सेव कर ली गई ✅');
+  showToast('बुकिंग हमेशा के लिए डिलीट कर दी गई ✅');
   renderTrash();
   renderDashboard();
 }
