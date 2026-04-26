@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jalwala-v3';
+const CACHE_NAME = 'jalwala-v4';
 const urlsToCache = [
   './',
   './index.html',
