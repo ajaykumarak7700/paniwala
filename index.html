@@ -159,14 +159,6 @@
       <div id="reminderList"></div>
     </div>
 
-    <!-- Upcoming Bookings -->
-    <div class="section-title" style="margin-top:16px">📅 आगामी बुकिंग</div>
-    <div id="upcomingList" class="card-list"></div>
-
-    <!-- Income/Expense History -->
-    <div class="section-title" style="margin-top:12px">📊 आय और खर्च का हिसाब (History)</div>
-    <div id="financeHistory" class="card-list" style="margin-bottom:20px"></div>
-
     <!-- Today's Bookings -->
     <div class="section-title" style="margin-top:12px">🗓️ आज की बुकिंग</div>
     <div id="todayList" class="card-list"></div>
@@ -333,6 +325,7 @@
       <button class="tab-btn active" onclick="switchTab('daily','reports')">दैनिक</button>
       <button class="tab-btn" onclick="switchTab('monthly','reports')">मासिक</button>
       <button class="tab-btn" onclick="switchTab('range','reports')">कस्टम रेंज</button>
+      <button class="tab-btn" onclick="switchTab('statement','reports')">स्टेटमेंट</button>
       <button class="tab-btn" onclick="switchTab('customer','reports')">ग्राहक</button>
     </div>
     <div id="tab-daily" class="tab-content active">
@@ -373,6 +366,10 @@
       </div>
       <div id="rangeReport"></div>
       <button class="btn-primary" onclick="exportExcel('range')" style="margin:16px;background:#2E7D32;width:calc(100% - 32px)">📊 रेंज रिपोर्ट डाउनलोड करें (Excel)</button>
+    </div>
+    <div id="tab-statement" class="tab-content">
+      <div class="section-title" style="margin-top:12px">📊 आय और खर्च का स्टेटमेंट</div>
+      <div id="fullFinanceHistory" class="card-list" style="margin-bottom:20px"></div>
     </div>
     <div id="tab-customer" class="tab-content">
       <div class="search-bar">

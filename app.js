@@ -156,6 +156,8 @@ function switchTab(tab, page) {
     if (tab === 'daily') renderDailyReport();
     if (tab === 'monthly') renderMonthlyReport();
     if (tab === 'customer') renderCustomerReport();
+    if (tab === 'range') renderRangeReport();
+    if (tab === 'statement') renderFullStatement();
   }
 }
 

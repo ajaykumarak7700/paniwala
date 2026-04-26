@@ -107,22 +107,25 @@ function renderDashboard(){
     }else rbox.style.display='none';
   }
 
-  document.getElementById('upcomingList').innerHTML=upcoming.length?upcoming.map(bookingCardHTML).join(''):emptyHTML('📅','कोई आगामी बुकिंग नहीं');
+  // document.getElementById('upcomingList').innerHTML=upcoming.length?upcoming.map(bookingCardHTML).join(''):emptyHTML('📅','कोई आगामी बुकिंग नहीं');
   document.getElementById('todayList').innerHTML=todayB.length?todayB.map(bookingCardHTML).join(''):emptyHTML('🗓️','आज कोई बुकिंग नहीं');
   
-  // Render Finance History
+  if(typeof renderCalendar === 'function') renderCalendar();
+}
+
+function renderFullStatement() {
   const history = [
     ...(DB.extraIncome || []).map(i => ({...i, type: 'income'})),
     ...(DB.extraExpense || []).map(e => ({...e, type: 'expense'}))
-  ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
+  ].sort((a, b) => b.date.localeCompare(a.date));
 
-  const histEl = document.getElementById('financeHistory');
+  const histEl = document.getElementById('fullFinanceHistory');
   if (histEl) {
     histEl.innerHTML = history.length ? history.map(item => `
       <div class="booking-card ${item.type === 'income' ? 'paid' : 'unpaid'}" style="padding:10px 14px">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-weight:700;font-size:14px">${item.type === 'income' ? '📈 आय' : '📉 खर्च'}: ₹${item.amount}</div>
+            <div style="font-weight:700;font-size:14px">${item.type === 'income' ? '📈 आय (Income)' : '📉 खर्च (Expense)'}: ₹${item.amount}</div>
             <div style="font-size:11px;color:#666;margin-top:2px">${item.note}</div>
           </div>
           <div style="font-size:11px;font-weight:600;color:#888">${fmtDate(item.date)}</div>
@@ -130,8 +133,6 @@ function renderDashboard(){
       </div>
     `).join('') : emptyHTML('📊', 'कोई लेनदेन नहीं');
   }
-
-  if(typeof renderCalendar === 'function') renderCalendar();
 }
 
 // ===== EXTRA INCOME / EXPENSE =====
