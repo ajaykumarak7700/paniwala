@@ -40,6 +40,9 @@ function initFirebase() {
   }
 }
 
+function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
+function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
+
 function save() { 
   if (!DB || typeof DB !== 'object') DB = { bookings: [], extraIncome: [], extraExpense: [], settings: {} };
   if (!DB.bookings) DB.bookings = [];
@@ -49,11 +52,24 @@ function save() {
   if (!DB.settings) DB.settings = {};
 
   localStorage.setItem('jalwala_db', JSON.stringify(DB)); 
+  
   if (firebaseDB && !isRemoteUpdate) {
-    firebaseDB.ref('jalwala_data').set(DB).catch(err => {
-      console.error("Firebase Save Error:", err);
-      showToast("क्लाउड पर सेव नहीं हो सका: " + err.message);
+    showLoading(); // Show spinner whenever we sync with cloud
+    return new Promise((resolve) => {
+      firebaseDB.ref('jalwala_data').set(DB)
+        .then(() => {
+          hideLoading();
+          resolve(true);
+        })
+        .catch(err => {
+          hideLoading();
+          console.error("Firebase Save Error:", err);
+          showToast("क्लाउड पर सेव नहीं हो सका: " + err.message);
+          resolve(false);
+        });
     });
+  } else {
+    return Promise.resolve(true);
   }
 }
 
@@ -214,7 +230,7 @@ function checkPin() {
 }
 window.checkPin = checkPin;
 
-function saveBooking() {
+async function saveBooking() {
   try {
     if (!checkPin()) return; // PIN Check
     
@@ -247,6 +263,8 @@ function saveBooking() {
       if(!confirm(`⚠️ चेतावनी: इस तारीख पर कुल ${sumBottlesOnDate + bottles} बोतल बुक हो रही हैं, जबकि आपके पास केवल ${maxBottles} बोतल हैं। क्या आप फिर भी सेव करना चाहते हैं?`)) return;
     }
 
+    showLoading(); // Show Spinner
+
     if (editId) {
       const idx = DB.bookings.findIndex(b => b.id === editId);
       if (idx > -1) {
@@ -262,7 +280,9 @@ function saveBooking() {
           remain: Math.max(0, total - adv),
           notes: document.getElementById('bookingNotes')?.value?.trim() || ''
         };
-        save(); clearForm(); showToast('बुकिंग अपडेट हो गई ✅'); renderBookingList(); return;
+        await save(); // Wait for Firebase
+        hideLoading();
+        clearForm(); showToast('बुकिंग अपडेट हो गई ✅'); renderBookingList(); return;
       }
     }
 
@@ -288,13 +308,16 @@ function saveBooking() {
     if (!Array.isArray(DB.bookings)) DB.bookings = [];
     
     DB.bookings.unshift(booking);
-    save();
+    await save(); // Wait for Firebase
+    hideLoading();
+
     clearForm();
     renderBookingList();
     
     document.getElementById('successModal').style.display = 'flex';
     setTimeout(() => generatePDF(booking.id), 500);
   } catch (err) {
+    hideLoading();
     console.error(err);
     showToast('त्रुटि: बुकिंग सेव नहीं हो सकी। ' + err.message);
   }
@@ -347,7 +370,7 @@ function editBooking(id) {
   window.scrollTo(0,0);
 }
 
-function deleteBooking(id) {
+async function deleteBooking(id) {
   if (!checkPin()) return;
   if (!confirm('इस बुकिंग को रीसायकल बिन में डालें?')) return;
   const idx = DB.bookings.findIndex(b => b.id === id);
@@ -355,21 +378,21 @@ function deleteBooking(id) {
     if (!DB.trash) DB.trash = [];
     DB.trash.unshift(DB.bookings[idx]);
     DB.bookings.splice(idx, 1);
-    save(); 
+    await save(); 
     showToast('बुकिंग रीसायकल बिन में भेज दी गई 🗑️'); 
     renderBookingList(); 
     renderDashboard();
   }
 }
 
-function restoreBooking(id) {
+async function restoreBooking(id) {
   if (!checkPin()) return;
   const idx = DB.trash.findIndex(b => b.id === id);
   if (idx > -1) {
     DB.bookings.unshift(DB.trash[idx]);
     DB.trash.splice(idx, 1);
-    save();
-    showToast('बुकिंग वापस (Restore) ले ली गई ✅');
+    await save();
+    showToast('बुकिंग वापस (Restore) ले li गई ✅');
     renderTrash();
     renderBookingList();
     renderDashboard();

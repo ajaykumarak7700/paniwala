@@ -401,7 +401,7 @@ function renderCustomerReport(){
 // MODALS are handled at the top
 function openPayModal(id){document.getElementById('payBookingId').value=id;document.getElementById('payAmount').value='';document.getElementById('payModal').style.display='flex';}
 function closePayModal(e){if(e.target.id==='payModal')document.getElementById('payModal').style.display='none';}
-function savePayment(){
+async function savePayment(){
   if (!checkPin()) return;
   const id=document.getElementById('payBookingId').value;
   const amt=parseFloat(document.getElementById('payAmount').value);
@@ -411,7 +411,7 @@ function savePayment(){
   DB.bookings[idx].remain=Math.max(0,DB.bookings[idx].total-DB.bookings[idx].paid);
   if(!DB.bookings[idx].payments)DB.bookings[idx].payments=[];
   DB.bookings[idx].payments.push({date:today(),amount:amt});
-  save();document.getElementById('payModal').style.display='none';
+  await save();document.getElementById('payModal').style.display='none';
   showToast('भुगतान सेव हो गया ✅');renderPayments();renderDashboard();
 }
 function openJarModal(id){
@@ -422,7 +422,7 @@ function openJarModal(id){
 }
 function closeJarModal(e){if(e.target.id==='jarModal')document.getElementById('jarModal').style.display='none';}
 function closeSuccessModal(e){if(e.target.id==='successModal')document.getElementById('successModal').style.display='none';}
-function saveJarReturn(){
+async function saveJarReturn(){
   if (!checkPin()) return;
   const id=document.getElementById('jarBookingId').value;
   const jR=parseInt(document.getElementById('jarsReturned').value) || 0;
@@ -431,7 +431,7 @@ function saveJarReturn(){
   const idx=DB.bookings.findIndex(b=>b.id===id);if(idx<0)return;
   DB.bookings[idx].jarsReturned=Math.min(DB.bookings[idx].jars,(DB.bookings[idx].jarsReturned||0)+jR);
   DB.bookings[idx].bottlesReturned=Math.min(DB.bookings[idx].bottles||0,(DB.bookings[idx].bottlesReturned||0)+bR);
-  save();document.getElementById('jarModal').style.display='none';
+  await save();document.getElementById('jarModal').style.display='none';
   showToast('वापसी दर्ज हो गई ✅');renderJars();renderDashboard();
 }
 
@@ -443,7 +443,7 @@ function openSellModal(){
   document.getElementById('sellModal').style.display='flex';
 }
 function closeSellModal(e){if(e.target.id==='sellModal')document.getElementById('sellModal').style.display='none';}
-function saveSell(){
+async function saveSell(){
   if (!checkPin()) return;
   const sJ=parseInt(document.getElementById('sellJars').value) || 0;
   const sB=parseInt(document.getElementById('sellBottles').value) || 0;
@@ -462,13 +462,13 @@ function saveSell(){
     DB.extraIncome.push({ id:uid(), date:today(), amount:amt, note:note });
   }
   
-  save();
+  await save();
   document.getElementById('sellModal').style.display='none';
   showToast('बिक्री सेव हो गई ✅');
   renderDashboard();
 }
 
-function confirmBooking(id){
+async function confirmBooking(id){
   const idx=DB.bookings.findIndex(b=>b.id===id);
   if(idx<0) return;
   const b = DB.bookings[idx];
@@ -496,7 +496,7 @@ function confirmBooking(id){
   if(!confirm('क्या आप इस साटा को कन्फर्म करना चाहते हैं? इसके बाद जार बाहर में जोड़ दिए जाएंगे।')) return;
   
   DB.bookings[idx].isConfirmed=true;
-  save();
+  await save();
   showToast('बुकिंग कन्फर्म हो गई ✅');
   renderDashboard();
   renderBookingList();
@@ -540,7 +540,7 @@ function openSettlementModal(id){
   document.getElementById('settlementModal').style.display='flex';
 }
 
-function saveSettlement(){
+async function saveSettlement(){
   if(!checkPin()) return;
   const id=document.getElementById('settlementId').value;
   const idx=DB.bookings.findIndex(b=>b.id===id);
@@ -569,7 +569,7 @@ function saveSettlement(){
     return;
   }
   
-  save();
+  await save();
   document.getElementById('settlementModal').style.display='none';
   showToast('हिसाब सफलता पूर्वक सेव हो गया ✅');
   renderDashboard();
@@ -605,7 +605,7 @@ function openSettings(){
   document.getElementById('settingsModal').style.display='flex';
 }
 function closeSettings(e){if(e.target.id==='settingsModal')document.getElementById('settingsModal').style.display='none';}
-function saveSettings(){
+async function saveSettings(){
   if (!checkPin()) return;
   DB.settings.bizName=document.getElementById('bizName').value.trim()||'आशा एंटरप्राइजेस';
   DB.settings.bizTagline=document.getElementById('bizTagline').value.trim()||'शुद्ध जल';
@@ -623,7 +623,7 @@ function saveSettings(){
   DB.settings.fbDbUrl = document.getElementById('fbDbUrl').value.trim();
   DB.settings.fbProjectId = document.getElementById('fbProjectId').value.trim();
 
-  save();
+  await save();
   if(typeof initFirebase === 'function') initFirebase();
   document.getElementById('settingsModal').style.display='none';
   showToast('सेटिंग सेव हो गई और Firebase कनेक्ट हो रहा है ✅');
