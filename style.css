@@ -156,8 +156,8 @@ body{font-family:'Noto Sans Devanagari',sans-serif;background:var(--bg);color:va
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
 
-/* Calendar Banner - Extra Thick Tiranga Border */
-.calendar-banner{background:transparent;border-radius:var(--radius);padding:14px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.2);border:12px solid transparent;display:flex;flex-direction:column}
+/* Calendar Banner - Extra Thick Tiranga Border with Outer Frame */
+.calendar-banner{background:transparent;border-radius:var(--radius);padding:14px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.2);border:12px solid transparent;outline:2px solid #0D47A1;outline-offset:-2px;display:flex;flex-direction:column}
 .calendar-banner::before {
   content: '';
   position: absolute;
@@ -176,7 +176,7 @@ body{font-family:'Noto Sans Devanagari',sans-serif;background:var(--bg);color:va
   background: linear-gradient(135deg,#f8faff,#eef2ff,#f8faff);
   border-radius: calc(var(--radius) - 12px);
   z-index: 1;
-  margin: 4px; /* Space to show the extra thick border */
+  margin: 4px; /* Space for the animated part */
 }
 @keyframes rotateBorder {
   0% { transform: rotate(0deg); }
