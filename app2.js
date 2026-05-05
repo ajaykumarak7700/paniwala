@@ -98,13 +98,17 @@ function renderDashboard(){
   document.getElementById('statPendingJars').textContent=pendingItems;
 
   const reminders=[];
-  const tmr=new Date();tmr.setDate(tmr.getDate()+1);
-  const tStr=tmr.toISOString().slice(0,10);
   DB.bookings.forEach(b=>{
-    if(b.eventDate===tStr) reminders.push({type:'event', text:`🎉 कल कार्यक्रम: ${b.name}`, booking:b});
-    if(b.remain>0) reminders.push({type:'pay', text:`💰 ₹${b.remain} बकाया: ${b.name}`, booking:b});
-    if(((b.jars-(b.jarsReturned||0))>0 || (b.bottles-(b.bottlesReturned||0))>0) && b.eventDate<t) {
-      reminders.push({type:'item', text:`⚠️ सामान बाकी: ${b.name}`, booking:b});
+    // Only reminders for past event dates (Sata bitne ke baad ka bakaya)
+    if(b.eventDate < t) {
+      // 1. Money Pending
+      if(b.remain > 0) {
+        reminders.push({type:'pay', text:`💰 ₹${b.remain} बकाया: ${b.name}`, booking:b});
+      }
+      // 2. Items Pending
+      if(b.isConfirmed && ((b.jars-(b.jarsReturned||0))>0 || (b.bottles-(b.bottlesReturned||0))>0)) {
+        reminders.push({type:'item', text:`⚠️ सामान बाकी: ${b.name}`, booking:b});
+      }
     }
   });
 
@@ -113,14 +117,26 @@ function renderDashboard(){
   if(rbox && rlist) {
     if(reminders.length){
       rbox.style.display='block';
-      rlist.innerHTML=reminders.slice(0,8).map(r=>{
+      rlist.innerHTML=reminders.slice(0,10).map(r=>{
         const b = r.booking;
         const msg = encodeURIComponent(buildWAMsg(b));
+        
+        // Calculate days passed since event
+        const eventD = new Date(b.eventDate);
+        const todayD = new Date(t);
+        const diffTime = todayD - eventD;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const daysText = diffDays > 0 ? `${diffDays} दिन पहले` : 'आज ही';
+
         return `
-        <div class="reminder-item" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#fff;border-radius:10px;margin-bottom:8px;box-shadow:0 2px 5px rgba(0,0,0,0.05)">
+        <div class="reminder-item" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#fff;border-radius:10px;margin-bottom:8px;box-shadow:0 2px 5px rgba(0,0,0,0.05);border-left:4px solid ${r.type==='pay'?'#C62828':'#FF9800'}">
           <div style="flex:1">
             <div style="font-weight:700;font-size:13px">${r.text}</div>
-            <div style="font-size:11px;color:#666;margin-top:2px">📱 ${b.mobile}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
+              <span style="font-size:11px;color:#888;font-weight:600">🕒 ${daysText}</span>
+              <span style="font-size:11px;color:#aaa">|</span>
+              <span style="font-size:11px;color:#666">📱 ${b.mobile}</span>
+            </div>
           </div>
           <div style="display:flex;gap:12px">
             <a href="tel:${b.mobile}" style="text-decoration:none;background:#E3F2FD;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:18px">📞</a>
@@ -130,6 +146,8 @@ function renderDashboard(){
       }).join('');
     }else rbox.style.display='none';
   }
+
+  initCalendar();
 
   // document.getElementById('upcomingList').innerHTML=upcoming.length?upcoming.map(bookingCardHTML).join(''):emptyHTML('📅','कोई आगामी बुकिंग नहीं');
   document.getElementById('todayList').innerHTML=todayB.length?todayB.map(bookingCardHTML).join(''):emptyHTML('🗓️','आज कोई बुकिंग नहीं');
@@ -143,19 +161,43 @@ function renderFullStatement() {
     ...(DB.extraExpense || []).map(e => ({...e, type: 'expense'}))
   ].sort((a, b) => b.date.localeCompare(a.date));
 
+  // Summary totals
+  const totalInc = (DB.extraIncome||[]).reduce((s,i)=>s+i.amount,0);
+  const totalExp = (DB.extraExpense||[]).reduce((s,e)=>s+e.amount,0);
+  const salaryTotal = (DB.extraExpense||[]).filter(e=>e.category==='salary').reduce((s,e)=>s+e.amount,0);
+  const commTotal = (DB.extraExpense||[]).filter(e=>e.category==='commission').reduce((s,e)=>s+e.amount,0);
+  const otherExpTotal = (DB.extraExpense||[]).filter(e=>!e.category||e.category==='other').reduce((s,e)=>s+e.amount,0);
+
+  const summaryHtml = `
+    <div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,0.08);margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:#1565C0;margin-bottom:10px;border-bottom:2px solid #E3F2FD;padding-bottom:8px">📊 सारांश (Summary)</div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid #f0f0f0"><span>📈 कुल आय</span><span style="font-weight:700;color:#2E7D32">₹${totalInc}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid #f0f0f0"><span>🚗 ड्राइवर सैलरी</span><span style="font-weight:700;color:#C62828">- ₹${salaryTotal}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid #f0f0f0"><span>💼 ड्राइवर कमीशन</span><span style="font-weight:700;color:#C62828">- ₹${commTotal}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid #f0f0f0"><span>📋 अन्य खर्च</span><span style="font-weight:700;color:#C62828">- ₹${otherExpTotal}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0 4px;font-size:14px;font-weight:800"><span>💎 शुद्ध कुल</span><span style="color:${totalInc-totalExp>=0?'#2E7D32':'#C62828'}">₹${totalInc-totalExp}</span></div>
+    </div>
+  `;
+
+  const catLabel = (item) => {
+    if(item.type==='income') return '📈 अन्य आय';
+    const labels = {salary:'🚗 सैलरी', commission:'💼 कमीशन', other:'📋 अन्य खर्च'};
+    return labels[item.category] || '📉 खर्च';
+  };
+
   const histEl = document.getElementById('fullFinanceHistory');
   if (histEl) {
-    histEl.innerHTML = history.length ? history.map(item => `
+    histEl.innerHTML = summaryHtml + (history.length ? history.map(item => `
       <div class="booking-card ${item.type === 'income' ? 'paid' : 'unpaid'}" style="padding:10px 14px">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-weight:700;font-size:14px">${item.type === 'income' ? '📈 आय (Income)' : '📉 खर्च (Expense)'}: ₹${item.amount}</div>
-            <div style="font-size:11px;color:#666;margin-top:2px">${item.note}</div>
+            <div style="font-weight:700;font-size:13px">${catLabel(item)}: <span style="font-size:14px">₹${item.amount}</span></div>
+            <div style="font-size:11px;color:#666;margin-top:2px">${item.note || '-'}</div>
           </div>
-          <div style="font-size:11px;font-weight:600;color:#888">${fmtDate(item.date)}</div>
+          <div style="font-size:11px;font-weight:600;color:#888;text-align:right">${fmtDate(item.date)}</div>
         </div>
       </div>
-    `).join('') : emptyHTML('📊', 'कोई लेनदेन नहीं');
+    `).join('') : emptyHTML('📊', 'कोई लेनदेन नहीं'));
   }
 }
 
@@ -186,26 +228,225 @@ function saveExtraIncome(){
   }
 }
 
+// ===== EXPENSE MODAL STATE =====
+let _expCurrentCategory = 'other';
+let _expHistoryShown = 10;
+
+const EXP_LABELS = {
+  salary:     '🚗 ड्राइवर को दी गई सैलरी',
+  commission: '💼 ड्राइवर को दिया गया कमीशन',
+  other:      '📋 अन्य खर्च'
+};
+const EXP_COLORS = {
+  salary:     { bg:'#E8F5E9', border:'#A5D6A7', col:'#2E7D32' },
+  commission: { bg:'#FFF3E0', border:'#FFCC80', col:'#E65100' },
+  other:      { bg:'#FFEBEE', border:'#EF9A9A', col:'#C62828' }
+};
+
 function openExpenseModal(){
+  // Reset form
   document.getElementById('expenseAmount').value='';
   document.getElementById('expenseNote').value='';
   document.getElementById('expenseDate').value=today();
+  // Show category chooser step
+  document.getElementById('expCategoryStep').style.display='block';
+  document.getElementById('expFormStep').style.display='none';
   document.getElementById('expenseModal').style.display='flex';
 }
-function closeExpenseModal(e){if(e.target.id==='expenseModal')document.getElementById('expenseModal').style.display='none';}
+
+function selectExpenseCategory(cat){
+  _expCurrentCategory = cat;
+  _expHistoryShown = 10;
+  // Update label
+  document.getElementById('expCategoryLabel').textContent = EXP_LABELS[cat] || cat;
+  // Update note placeholder
+  const placeholders = {
+    salary:     'सैलरी माह / विवरण (Optional)',
+    commission: 'बुकिंग नं. / विवरण (Optional)',
+    other:      'खर्च का कारण?'
+  };
+  document.getElementById('expenseNote').placeholder = placeholders[cat] || 'विवरण';
+  // Switch step
+  document.getElementById('expCategoryStep').style.display='none';
+  document.getElementById('expFormStep').style.display='block';
+  renderExpHistory();
+}
+
+function backToExpenseCategory(){
+  document.getElementById('expCategoryStep').style.display='block';
+  document.getElementById('expFormStep').style.display='none';
+}
+
+function renderExpHistory(){
+  const allExp = DB.extraExpense || [];
+  // Match entries: new ones have category field; old 'other' entries have no category
+  const list = allExp.filter(e => {
+    if (_expCurrentCategory === 'other') return !e.category || e.category === 'other';
+    return e.category === _expCurrentCategory;
+  });
+  list.sort((a,b) => b.date.localeCompare(a.date));
+
+  const c = EXP_COLORS[_expCurrentCategory] || EXP_COLORS.other;
+  const total = list.length;
+  const shown = list.slice(0, _expHistoryShown);
+
+  // Update count badge
+  const countEl = document.getElementById('expHistoryCount');
+  if(countEl) countEl.textContent = total + ' खर्च';
+
+  const el = document.getElementById('expHistoryList');
+  if(!el) return;
+
+  if(!shown.length){
+    el.innerHTML = '<div style="text-align:center;padding:18px;color:#aaa;font-size:12px">📭 कोई पुराना रिकॉर्ड नहीं</div>';
+    document.getElementById('expMoreBtn').style.display = 'none';
+    return;
+  }
+
+  let totalShown = 0;
+  shown.forEach(x => totalShown += x.amount);
+
+  el.innerHTML = `<div style="background:${c.bg};border:1px solid ${c.border};border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:12px;font-weight:700;color:${c.col}">दिखाया गया कुल:</span>
+    <span style="font-size:14px;font-weight:800;color:${c.col}">₹${totalShown}</span>
+  </div>` +
+  shown.map(item => `
+    <div style="background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;border-left:4px solid ${c.border};box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center">
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:14px;color:${c.col}">₹${item.amount}</div>
+        <div style="font-size:11px;color:#666;margin-top:2px">${item.note || '-'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:#888;font-weight:600">${fmtDate(item.date)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('expMoreBtn').style.display = total > _expHistoryShown ? 'block' : 'none';
+}
+
+function loadMoreExpHistory(){
+  _expHistoryShown += 10;
+  renderExpHistory();
+}
+
+// ===== DRIVER WALLET =====
+function openDriverWallet(){
+  renderDriverWallet();
+  document.getElementById('driverWalletModal').style.display='flex';
+}
+
+function renderDriverWallet(){
+  const expenses = DB.extraExpense || [];
+  const salaryList = expenses.filter(e => e.category === 'salary');
+  const commList   = expenses.filter(e => e.category === 'commission');
+
+  const totalSalary = salaryList.reduce((s,e) => s + e.amount, 0);
+  const totalComm   = commList.reduce((s,e) => s + e.amount, 0);
+  const totalPaid   = totalSalary + totalComm;
+
+  document.getElementById('dwTotalSalary').textContent = '₹' + totalSalary;
+  document.getElementById('dwTotalComm').textContent   = '₹' + totalComm;
+  document.getElementById('dwTotalPaid').textContent   = '₹' + totalPaid;
+
+  // Month-wise map
+  const monthMap = {};
+  [...salaryList, ...commList].forEach(e => {
+    const m = (e.date || '').slice(0,7);
+    if(!m) return;
+    if(!monthMap[m]) monthMap[m] = { salary:0, commission:0, salaryItems:[], commItems:[] };
+    if(e.category === 'salary'){
+      monthMap[m].salary += e.amount;
+      monthMap[m].salaryItems.push(e);
+    } else {
+      monthMap[m].commission += e.amount;
+      monthMap[m].commItems.push(e);
+    }
+  });
+
+  const sortedMonths = Object.keys(monthMap).sort((a,b) => b.localeCompare(a));
+
+  const hindiMonths = ['जनवरी','फ़रवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'];
+
+  const cntEl = document.getElementById('dwMonthCount');
+  if(cntEl) cntEl.textContent = sortedMonths.length + ' महीने';
+
+  const el = document.getElementById('dwMonthTable');
+  if(!el) return;
+
+  if(!sortedMonths.length){
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:#aaa;font-size:13px">📭 अभी तक कोई सैलरी/कमीशन दर्ज नहीं हुई<br><span style="font-size:11px;margin-top:6px;display:block">📉 अन्य खर्च जोड़ें से दर्ज करें</span></div>';
+    return;
+  }
+
+  el.innerHTML = sortedMonths.map(mStr => {
+    const [y, mo] = mStr.split('-');
+    const mName = hindiMonths[parseInt(mo)-1] + ' ' + y;
+    const d = monthMap[mStr];
+    const total = d.salary + d.commission;
+
+    // Build detail rows for salary items
+    const salDetails = d.salaryItems.map(x =>
+      `<div style="font-size:10px;color:#555;padding:2px 0;border-bottom:1px dotted #ddd">
+        ${fmtDate(x.date)} — ${x.note || 'सैलरी'} — <b style="color:#2E7D32">₹${x.amount}</b>
+      </div>`).join('');
+    const commDetails = d.commItems.map(x =>
+      `<div style="font-size:10px;color:#555;padding:2px 0;border-bottom:1px dotted #ddd">
+        ${fmtDate(x.date)} — ${x.note || 'कमीशन'} — <b style="color:#E65100">₹${x.amount}</b>
+      </div>`).join('');
+
+    return `
+    <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);border-left:4px solid #1565C0">
+      <div style="font-weight:800;font-size:14px;color:#1565C0;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+        <span>📅 ${mName}</span>
+        <span style="background:#E3F2FD;padding:3px 10px;border-radius:20px;font-size:12px">₹${total}</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div style="flex:1;background:#E8F5E9;border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#2E7D32;font-weight:700">🚗 सैलरी</div>
+          <div style="font-size:17px;font-weight:900;color:#2E7D32;margin-top:4px">₹${d.salary}</div>
+        </div>
+        <div style="flex:1;background:#FFF3E0;border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#E65100;font-weight:700">💼 कमीशन</div>
+          <div style="font-size:17px;font-weight:900;color:#E65100;margin-top:4px">₹${d.commission}</div>
+        </div>
+        <div style="flex:1;background:#E3F2FD;border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#1565C0;font-weight:700">💰 कुल</div>
+          <div style="font-size:17px;font-weight:900;color:#1565C0;margin-top:4px">₹${total}</div>
+        </div>
+      </div>
+      ${salDetails || commDetails ? `
+      <details style="margin-top:4px">
+        <summary style="font-size:11px;color:#888;cursor:pointer;font-weight:600">📋 विस्तार देखें (${d.salaryItems.length + d.commItems.length} entries)</summary>
+        <div style="margin-top:8px;padding:8px;background:#f8f9fc;border-radius:8px">
+          ${salDetails}${commDetails}
+        </div>
+      </details>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function closeExpenseModal(e){
+  if(e.target && e.target.id==='expenseModal') document.getElementById('expenseModal').style.display='none';
+}
+
 function saveExtraExpense(){
   if (!checkPin()) return;
   try {
-    const amt=parseFloat(document.getElementById('expenseAmount')?.value) || 0;
-    const note=document.getElementById('expenseNote')?.value?.trim() || 'अन्य खर्च';
-    const date=document.getElementById('expenseDate')?.value || today();
-    if(amt<=0){showToast('कृपया सही राशि दर्ज करें');return;}
-    if(!DB.extraExpense) DB.extraExpense=[];
-    DB.extraExpense.push({id:uid(), date, amount:amt, note});
+    const amt = parseFloat(document.getElementById('expenseAmount')?.value) || 0;
+    const note = document.getElementById('expenseNote')?.value?.trim() || EXP_LABELS[_expCurrentCategory] || 'अन्य खर्च';
+    const date = document.getElementById('expenseDate')?.value || today();
+    if(amt <= 0){ showToast('कृपया सही राशि दर्ज करें'); return; }
+    if(!DB.extraExpense) DB.extraExpense = [];
+    DB.extraExpense.push({ id:uid(), date, amount:amt, note, category: _expCurrentCategory });
     save();
-    document.getElementById('expenseModal').style.display='none';
+    // Clear form but stay open — show updated history
+    document.getElementById('expenseAmount').value = '';
+    document.getElementById('expenseNote').value = '';
+    document.getElementById('expenseDate').value = today();
     showToast('खर्च सेव हो गया 📉');
     renderDashboard();
+    renderExpHistory(); // Refresh in-modal history
   } catch (err) {
     console.error(err);
     showToast('खर्च सेव करने में त्रुटि: ' + err.message);
@@ -930,6 +1171,56 @@ function exportExcel(type = 'full'){
     rows.push(['दिनांक', 'विवरण', 'राशि']);
     income.forEach(i => rows.push([i.date, `"${i.note}"`, i.amount]));
   }
+// ===== REMOTE UPDATE SYSTEM =====
+
+function checkAppUpdate() {
+  const dbVer = DB.settings.appVersion || 1.0;
+  // If DB version is higher than current code version, show update modal
+  if (dbVer > APP_CODE_VERSION) {
+    document.getElementById('updateModal').style.display = 'flex';
+  }
+}
+
+async function pushNewUpdate() {
+  if (!checkPin()) return;
+  
+  const newVer = (DB.settings.appVersion || 1.0) + 0.1;
+  const ok = confirm(`क्या आप सभी यूजर्स के लिए नया अपडेट (v${newVer.toFixed(1)}) पुश करना चाहते हैं?`);
+  if (!ok) return;
+
+  DB.settings.appVersion = newVer;
+  save(); // This will sync to Firebase and notify everyone
+  showToast('अपडेट सफलतापुर्वक पुश कर दिया गया! 🚀');
+  renderSettings();
+}
+
+async function forceAppUpdate() {
+  showToast('अपडेट हो रहा है, कृपया रुकें...');
+  
+  try {
+    // 1. Unregister Service Workers
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let registration of registrations) {
+        await registration.unregister();
+      }
+    }
+    
+    // 2. Clear Caches
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      for (let name of cacheNames) {
+        await caches.delete(name);
+      }
+    }
+
+    // 3. Force Reload from Server (ignoring local cache)
+    location.reload(true);
+  } catch (err) {
+    console.error('Update Error:', err);
+    location.reload();
+  }
+}
 
   if(expense.length){
     rows.push([]);
@@ -1012,11 +1303,9 @@ function generatePDF(id){
 // ===== INIT =====
 window.addEventListener('DOMContentLoaded',()=>{
   load();setHeaderDate();
-  document.getElementById('eventDate').value=today();
+  initCalendar();
   if (typeof checkDateAvailability === 'function') checkDateAvailability();
   renderDashboard();
-  
-  // Auto-sync from cloud on startup - Handled by Firebase listener in app.js
 });
 document.addEventListener('click',e=>{
   if(!e.target.closest('.form-group')){
@@ -1048,4 +1337,109 @@ function renderTrash() {
       </div>
     </div>
   `).join('');
+}
+
+// ===== ADVANCED CALENDAR SYSTEM (FLATPICKR) =====
+let _fp = null;
+function initCalendar() {
+  const el = document.getElementById('eventDate');
+  if (!el) return;
+  
+  if (_fp) _fp.destroy();
+  
+  _fp = flatpickr(el, {
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "d-m-Y",
+    allowInput: true,
+    monthSelectorType: "static",
+    onDayCreate: function(dObj, dStr, fp, dayElem) {
+      const date = dayElem.dateObj.toISOString().slice(0, 10);
+      const dayBookings = DB.bookings.filter(b => b.eventDate === date);
+      
+      if (dayBookings.length > 0) {
+        // Check status
+        const isAllFinal = dayBookings.every(b => {
+          const jarPending = b.jars - (b.jarsReturned || 0);
+          return b.isConfirmed && b.remain <= 0 && jarPending <= 0;
+        });
+
+        if (isAllFinal) {
+          // Add Green background and Cross
+          dayElem.style.background = "#E8F5E9";
+          dayElem.style.borderRadius = "8px";
+          dayElem.innerHTML += '<span style="position:absolute;top:2px;right:2px;font-size:10px;color:#2E7D32">❌</span>';
+        } else {
+          // Add Orange background for Pending
+          dayElem.style.background = "#FFF3E0";
+          dayElem.style.borderRadius = "8px";
+          dayElem.innerHTML += '<span style="position:absolute;top:2px;right:2px;font-size:10px;color:#E65100">⏳</span>';
+        }
+      }
+    },
+    onChange: function() {
+      checkDateAvailability();
+    }
+  });
+}
+
+function checkDateAvailability() {
+  const input = document.getElementById('eventDate');
+  const dateStr = input?.value;
+  const box = document.getElementById('dateAvailability');
+  const text = document.getElementById('dateStatusText');
+  const list = document.getElementById('dateBookingCards');
+  
+  if (!dateStr) {
+    if(box) box.style.display = 'none';
+    return;
+  }
+  
+  const bookings = DB.bookings.filter(b => b.eventDate === dateStr);
+  if(box) box.style.display = 'block';
+  
+  if (bookings.length === 0) {
+    text.innerHTML = '<span style="color:#2E7D32">✅ यह तारीख खाली है। आप बुकिंग कर सकते हैं।</span>';
+    list.innerHTML = '';
+    box.style.background = '#E8F5E9';
+    box.style.borderColor = '#A5D6A7';
+    return;
+  }
+  
+  // Check if all bookings on this date are "Finalized"
+  const isAllFinal = bookings.every(b => {
+    const jarPending = b.jars - (b.jarsReturned || 0);
+    const bottlePending = b.bottles - (b.bottlesReturned || 0);
+    const moneyPending = b.remain > 0;
+    return b.isConfirmed && !moneyPending && jarPending <= 0 && bottlePending <= 0;
+  });
+  
+  if (isAllFinal) {
+    text.innerHTML = '<span style="color:#2E7D32;font-weight:800">✅ इस दिन के सभी कार्य (Sata) पूर्ण हो चुके हैं।</span>';
+    box.style.background = '#E8F5E9';
+    box.style.borderColor = '#A5D6A7';
+  } else {
+    text.innerHTML = '<span style="color:#C62828;font-weight:800">⏳ इस दिन कार्य (Sata) अभी जारी है।</span>';
+    box.style.background = '#FFF3E0';
+    box.style.borderColor = '#FFCC80';
+  }
+  
+  // Show mini-cards for the bookings on that date
+  list.innerHTML = bookings.map(b => {
+    const jarPending = b.jars - (b.jarsReturned || 0);
+    const isFinal = b.isConfirmed && b.remain <= 0 && jarPending <= 0;
+    return `
+      <div style="background:#fff;padding:10px 12px;border-radius:10px;border-left:4px solid ${isFinal ? '#2E7D32' : '#E65100'};box-shadow:0 1px 4px rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:13px;color:#333">${b.name} <span style="font-size:10px;font-weight:400;color:#888">• ${b.eventType}</span></div>
+          <div style="font-size:11px;color:${b.remain > 0 ? '#C62828' : '#666'};margin-top:2px">
+            ₹${b.remain} बकाया | ${jarPending > 0 ? jarPending + ' जार बाकी' : 'सभी जार वापस'}
+          </div>
+        </div>
+        <span style="font-size:10px;font-weight:900;padding:4px 8px;border-radius:20px;background:${isFinal ? '#E8F5E9' : '#FFF3E0'};color:${isFinal ? '#2E7D32' : '#E65100'}">
+          ${isFinal ? '✅ FINAL' : '⏳ PENDING'}
+        </span>
+      </div>
+    `;
+  }).join('');
 }

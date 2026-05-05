@@ -18,6 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#1565C0"/>
 <link rel="apple-touch-icon" href="logo.png"/>
@@ -150,6 +152,11 @@
       </button>
       <button class="btn-danger" onclick="openExpenseModal()" style="background:#C62828;color:#fff;border:none;border-radius:30px;padding:12px 20px;font-size:14px;flex:1;max-width:200px">
         📉 अन्य खर्च जोड़ें
+      </button>
+    </div>
+    <div style="margin:-4px 16px 16px">
+      <button onclick="openDriverWallet()" style="width:100%;background:linear-gradient(135deg,#1A237E,#1565C0);color:#fff;border:none;border-radius:30px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(21,101,192,0.35);font-family:'Noto Sans Devanagari',sans-serif">
+        🚗 ड्राइवर वॉलेट देखें
       </button>
     </div>
 
@@ -444,17 +451,75 @@
   </div>
 </div>
 
-<!-- Extra Expense Modal -->
+<!-- Extra Expense Modal (Enhanced - 3 Categories) -->
 <div id="expenseModal" class="modal-overlay" style="display:none" onclick="closeExpenseModal(event)">
-  <div class="modal-box">
-    <div class="modal-title">📉 अन्य खर्च</div>
-    <div class="form-group"><label>खर्च राशि ₹</label><input type="number" id="expenseAmount" placeholder="0"/></div>
-    <div class="form-group"><label>विवरण (Optional)</label><input type="text" id="expenseNote" placeholder="खर्च का कारण?"/></div>
-    <div class="form-group"><label>दिनांक</label><input type="date" id="expenseDate"/></div>
-    <div class="btn-group">
-      <button class="btn-primary" onclick="saveExtraExpense()" style="background:#C62828">✅ खर्च सेव करें</button>
-      <button class="btn-secondary" onclick="document.getElementById('expenseModal').style.display='none'">बंद करें</button>
+  <div class="modal-box" style="max-height:90vh;overflow-y:auto">
+
+    <!-- STEP 1: Category Chooser -->
+    <div id="expCategoryStep">
+      <div class="modal-title" style="margin-bottom:10px">📉 खर्च का प्रकार चुनें</div>
+      <div style="font-size:12px;color:#888;margin-bottom:16px;font-weight:600">नीचे से उचित विकल्प पर क्लिक करें</div>
+
+      <!-- Driver Salary -->
+      <button id="expBtn-salary" onclick="selectExpenseCategory('salary')" style="display:flex;align-items:center;gap:14px;width:100%;background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:2.5px solid #A5D6A7;border-radius:16px;padding:15px 16px;margin-bottom:11px;cursor:pointer;text-align:left;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 3px 10px rgba(46,125,50,0.12)">
+        <div style="font-size:34px;line-height:1;flex-shrink:0">🚗</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:14px;color:#2E7D32">ड्राइवर को दी गई सैलरी</div>
+          <div style="font-size:11px;color:#555;margin-top:3px">Monthly / Fixed Salary</div>
+        </div>
+        <div style="margin-left:auto;font-size:20px;color:#2E7D32">➤</div>
+      </button>
+
+      <!-- Driver Commission -->
+      <button id="expBtn-commission" onclick="selectExpenseCategory('commission')" style="display:flex;align-items:center;gap:14px;width:100%;background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border:2.5px solid #FFCC80;border-radius:16px;padding:15px 16px;margin-bottom:11px;cursor:pointer;text-align:left;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 3px 10px rgba(230,81,0,0.12)">
+        <div style="font-size:34px;line-height:1;flex-shrink:0">💼</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:14px;color:#E65100">ड्राइवर को दिया गया कमीशन</div>
+          <div style="font-size:11px;color:#555;margin-top:3px">Per Booking / Trip Commission</div>
+        </div>
+        <div style="margin-left:auto;font-size:20px;color:#E65100">➤</div>
+      </button>
+
+      <!-- Other Expense -->
+      <button id="expBtn-other" onclick="selectExpenseCategory('other')" style="display:flex;align-items:center;gap:14px;width:100%;background:linear-gradient(135deg,#FFEBEE,#FFCDD2);border:2.5px solid #EF9A9A;border-radius:16px;padding:15px 16px;margin-bottom:6px;cursor:pointer;text-align:left;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 3px 10px rgba(198,40,40,0.12)">
+        <div style="font-size:34px;line-height:1;flex-shrink:0">📋</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:14px;color:#C62828">अन्य खर्च</div>
+          <div style="font-size:11px;color:#555;margin-top:3px">Miscellaneous / Other Expenses</div>
+        </div>
+        <div style="margin-left:auto;font-size:20px;color:#C62828">➤</div>
+      </button>
+
+      <button class="btn-secondary" onclick="document.getElementById('expenseModal').style.display='none'" style="margin-top:10px">❌ बंद करें</button>
     </div>
+
+    <!-- STEP 2: Form + History -->
+    <div id="expFormStep" style="display:none">
+      <!-- Back + Title -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <button onclick="backToExpenseCategory()" style="background:#E3F2FD;border:none;border-radius:10px;padding:8px 13px;cursor:pointer;font-size:13px;color:#1565C0;font-weight:700;white-space:nowrap">◀ वापस</button>
+        <div id="expCategoryLabel" style="font-size:14px;font-weight:800;color:#1565C0;flex:1"></div>
+      </div>
+
+      <!-- Form -->
+      <div style="background:#f8faff;border-radius:14px;padding:14px;margin-bottom:14px;border:1.5px solid #e3eaf5">
+        <div class="form-group"><label>खर्च राशि ₹ *</label><input type="number" id="expenseAmount" placeholder="0" style="font-size:20px;font-weight:800;color:#C62828"/></div>
+        <div class="form-group"><label>विवरण</label><input type="text" id="expenseNote" placeholder="खर्च का कारण?"/></div>
+        <div class="form-group" style="margin-bottom:0"><label>दिनांक</label><input type="date" id="expenseDate"/></div>
+      </div>
+
+      <button class="btn-primary" onclick="saveExtraExpense()" style="background:linear-gradient(135deg,#C62828,#8b0000);margin-bottom:16px">✅ खर्च सेव करें</button>
+
+      <!-- History Section -->
+      <div style="border-top:2px solid #f0f0f0;padding-top:14px">
+        <div style="font-size:13px;font-weight:800;color:#333;margin-bottom:10px;display:flex;align-items:center;gap:6px">🕒 पिछला इतिहास <span id="expHistoryCount" style="background:#E3F2FD;color:#1565C0;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700"></span></div>
+        <div id="expHistoryList"></div>
+        <button id="expMoreBtn" onclick="loadMoreExpHistory()" style="display:none;width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1.5px solid #dde3f0;background:#f0f4ff;color:#1565C0;font-size:13px;font-weight:700;cursor:pointer">📜 और देखें...</button>
+      </div>
+
+      <button class="btn-secondary" onclick="document.getElementById('expenseModal').style.display='none'" style="margin-top:10px">❌ बंद करें</button>
+    </div>
+
   </div>
 </div>
 
@@ -534,6 +599,47 @@
       <button class="btn-primary" onclick="saveSell()">✅ सेव करें</button>
       <button class="btn-secondary" onclick="document.getElementById('sellModal').style.display='none'">बंद करें</button>
     </div>
+  </div>
+</div>
+
+<!-- Driver Wallet Modal -->
+<div id="driverWalletModal" class="modal-overlay" style="display:none" onclick="if(event.target.id==='driverWalletModal')this.style.display='none'">
+  <div class="modal-box" style="max-height:92vh;overflow-y:auto">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,#1565C0,#0D47A1);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">🚗</div>
+      <div>
+        <div style="font-size:17px;font-weight:900;color:#1565C0">ड्राइवर वॉलेट</div>
+        <div style="font-size:11px;color:#888;margin-top:2px">सैलरी + कमीशन का पूरा हिसाब</div>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border-radius:14px;padding:14px;text-align:center;border:1.5px solid #A5D6A7">
+        <div style="font-size:20px;margin-bottom:4px">🚗</div>
+        <div style="font-size:11px;color:#2E7D32;font-weight:700;margin-bottom:6px">कुल सैलरी</div>
+        <div id="dwTotalSalary" style="font-size:20px;font-weight:900;color:#2E7D32">₹0</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border-radius:14px;padding:14px;text-align:center;border:1.5px solid #FFCC80">
+        <div style="font-size:20px;margin-bottom:4px">💼</div>
+        <div style="font-size:11px;color:#E65100;font-weight:700;margin-bottom:6px">कुल कमीशन</div>
+        <div id="dwTotalComm" style="font-size:20px;font-weight:900;color:#E65100">₹0</div>
+      </div>
+    </div>
+
+    <!-- Grand Total -->  
+    <div style="background:linear-gradient(135deg,#1565C0,#0D47A1);border-radius:14px;padding:16px;text-align:center;margin-bottom:20px;box-shadow:0 6px 20px rgba(21,101,192,0.3)">
+      <div style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:700;margin-bottom:6px">💰 अब तक ड्राइवर को दिया गया कुल</div>
+      <div id="dwTotalPaid" style="font-size:28px;font-weight:900;color:#fff">₹0</div>
+    </div>
+
+    <!-- Month-wise breakdown -->
+    <div style="font-size:13px;font-weight:800;color:#333;margin-bottom:12px;display:flex;align-items:center;gap:8px">📅 माह-वार विवरण <span id="dwMonthCount" style="background:#E3F2FD;color:#1565C0;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700"></span></div>
+    <div id="dwMonthTable"></div>
+
+    <button class="btn-secondary" onclick="document.getElementById('driverWalletModal').style.display='none'" style="margin-top:14px">❌ बंद करें</button>
   </div>
 </div>
 
